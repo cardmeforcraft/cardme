@@ -84,7 +84,7 @@ export default function CartDrawer() {
                       Scale: {item.scale} • {item.color}
                     </p>
                     <p className="text-sm font-black text-[#C8102E] mt-1">
-                      ${item.price.toFixed(2)}
+                      ₹{item.price.toFixed(2)}
                     </p>
                   </div>
 
@@ -127,7 +127,7 @@ export default function CartDrawer() {
               <div className="space-y-1.5 text-xs text-slate-600">
                 <div className="flex justify-between">
                   <span>Subtotal</span>
-                  <span className="font-extrabold text-slate-900">${subtotal.toFixed(2)}</span>
+                  <span className="font-extrabold text-slate-900">₹{subtotal.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between text-slate-500">
                   <span>Estimated Shipping</span>
@@ -135,7 +135,7 @@ export default function CartDrawer() {
                 </div>
                 <div className="pt-2 border-t border-slate-200 flex justify-between text-sm font-black text-slate-900">
                   <span>Total</span>
-                  <span className="text-[#C8102E]">${subtotal.toFixed(2)}</span>
+                  <span className="text-[#C8102E]">₹{subtotal.toFixed(2)}</span>
                 </div>
               </div>
 

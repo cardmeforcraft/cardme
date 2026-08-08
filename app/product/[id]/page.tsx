@@ -119,11 +119,11 @@ export default function ProductDetailPage() {
             </h1>
             <div className="mt-3 flex items-baseline gap-3">
               <span className="text-2xl font-black text-[#C8102E]">
-                ${product.price?.toFixed(2)}
+                ₹{product.price?.toFixed(2)}
               </span>
               {product.originalPrice && product.originalPrice > product.price && (
                 <span className="text-sm font-semibold text-slate-400 line-through">
-                  ${product.originalPrice.toFixed(2)}
+                  ₹{product.originalPrice.toFixed(2)}
                 </span>
               )}
             </div>

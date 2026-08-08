@@ -71,9 +71,9 @@ export default function ProductCard({
         </div>
         <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
           <div>
-            <span className="text-lg font-black text-[#1A1A2E] tracking-tight">${price.toFixed(2)}</span>
+            <span className="text-lg font-black text-[#1A1A2E] tracking-tight">₹{price.toFixed(2)}</span>
             {originalPrice && originalPrice > price && (
-              <span className="text-xs text-slate-400 line-through ml-1.5">${originalPrice.toFixed(2)}</span>
+              <span className="text-xs text-slate-400 line-through ml-1.5">₹{originalPrice.toFixed(2)}</span>
             )}
           </div>
           <button onClick={handleAddCart} className="bg-[#C8102E] hover:bg-[#a00d24] active:scale-95 text-white text-xs font-extrabold px-3 py-2 rounded-lg flex items-center gap-1.5 shadow-sm transition-all">

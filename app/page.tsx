@@ -233,9 +233,9 @@ export default function HomePage() {
                       </Link>
                       <div className="mt-3 pt-2 border-t border-slate-100 flex items-center justify-between gap-1">
                         <div>
-                          <span className="text-base sm:text-lg font-black text-[#1A1A2E]">${product.price?.toFixed(2)}</span>
+                          <span className="text-base sm:text-lg font-black text-[#1A1A2E]">₹{product.price?.toFixed(2)}</span>
                           {product.originalPrice && product.originalPrice > product.price && (
-                            <span className="text-[11px] text-slate-400 line-through ml-1.5">${product.originalPrice.toFixed(2)}</span>
+                            <span className="text-[11px] text-slate-400 line-through ml-1.5">₹{product.originalPrice.toFixed(2)}</span>
                           )}
                         </div>
                         <button

@@ -255,40 +255,7 @@ export default function AdminPage() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6 pb-16">
-      {/* Top Header */}
-      <div className="bg-slate-900 text-white p-6 rounded-2xl shadow-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <div className="p-3 bg-[#C8102E] rounded-xl text-white">
-            <ShieldCheck className="w-8 h-8" />
-          </div>
-          <div>
-            <h1
-              className="text-xl sm:text-2xl font-black uppercase tracking-wide italic"
-              style={{ fontFamily: "'Space Grotesk', sans-serif" }}
-            >
-              DIECAST ELITE ADMIN CONTROL
-            </h1>
-            <p className="text-xs text-slate-400">
-              Manage inventory, add/upload diecast cars, track customer orders &amp; database
-            </p>
-          </div>
-        </div>
-        <div className="flex items-center gap-3">
-          <button
-            onClick={handleSeed}
-            className="bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold px-3.5 py-2 rounded-lg flex items-center gap-1.5 shadow"
-          >
-            <Sparkles className="w-4 h-4" />
-            <span>Reset Demo DB</span>
-          </button>
-          <Link
-            href="/"
-            className="bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold px-3.5 py-2 rounded-lg border border-slate-700"
-          >
-            View Live Site
-          </Link>
-        </div>
-      </div>
+      
 
       {statusMsg && (
         <div className="p-4 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold rounded-xl flex items-center justify-between">
@@ -320,15 +287,7 @@ export default function AdminPage() {
             <h3 className="text-2xl font-black text-slate-900">{orders.length} Orders</h3>
           </div>
         </div>
-        <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center gap-4">
-          <div className="p-3 bg-purple-50 text-purple-600 rounded-xl">
-            <ShieldCheck className="w-6 h-6" />
-          </div>
-          <div>
-            <p className="text-xs font-bold text-slate-400 uppercase">Database Status</p>
-            <h3 className="text-2xl font-black text-emerald-600">MongoDB Active</h3>
-          </div>
-        </div>
+     
       </div>
 
       {/* Tabs Bar */}
@@ -447,7 +406,7 @@ export default function AdminPage() {
                       </td>
                       <td className="p-3.5 font-semibold text-red-700">{prod.scale}</td>
                       <td className="p-3.5">{prod.series || prod.brand}</td>
-                      <td className="p-3.5 font-extrabold text-slate-900">${prod.price?.toFixed(2)}</td>
+                      <td className="p-3.5 font-extrabold text-slate-900">₹{prod.price?.toFixed(2)}</td>
                       <td className="p-3.5 font-bold text-emerald-600">{prod.stockCount || 25} in stock</td>
                       <td className="p-3.5 text-right">
                         <div className="flex items-center justify-end gap-2">
@@ -508,7 +467,7 @@ export default function AdminPage() {
                       <td className="p-3 text-slate-500">{ord.email}<br />{ord.phone}</td>
                       <td className="p-3 text-slate-600">{ord.address}, {ord.city}</td>
                       <td className="p-3 font-semibold">{ord.items?.length || 1} diecast car(s)</td>
-                      <td className="p-3 font-black text-slate-900">${ord.totalAmount?.toFixed(2)}</td>
+                      <td className="p-3 font-black text-slate-900">₹{ord.totalAmount?.toFixed(2)}</td>
                       <td className="p-3">
                         <span className="bg-amber-100 text-amber-800 text-[10px] font-extrabold px-2 py-0.5 rounded-full">
                           {ord.status || "Pending"}

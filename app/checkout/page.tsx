@@ -90,7 +90,7 @@ export default function CheckoutPage() {
           <p><strong className="text-slate-900">Name:</strong> {completedOrder.customerName}</p>
           <p><strong className="text-slate-900">Email:</strong> {completedOrder.email}</p>
           <p><strong className="text-slate-900">Shipping Address:</strong> {completedOrder.address}, {completedOrder.city} {completedOrder.zipCode}</p>
-          <p><strong className="text-slate-900">Total Charged:</strong> <span className="text-[#0256B3] font-bold">${completedOrder.totalAmount?.toFixed(2) || subtotal.toFixed(2)}</span></p>
+          <p><strong className="text-slate-900">Total Charged:</strong> <span className="text-[#0256B3] font-bold">₹{completedOrder.totalAmount?.toFixed(2) || subtotal.toFixed(2)}</span></p>
         </div>
 
         <Link
@@ -217,12 +217,12 @@ export default function CheckoutPage() {
             </div>
           </div>
 
-          <div className="flex items-center gap-2 border-b border-slate-100 pb-3 pt-4">
+          {/* <div className="flex items-center gap-2 border-b border-slate-100 pb-3 pt-4">
             <CreditCard className="w-5 h-5 text-[#0256B3]" />
             <h2 className="text-sm font-black uppercase text-slate-900">2. Payment Method</h2>
-          </div>
+          </div> */}
 
-          <div className="p-4 bg-blue-50 border border-blue-200 rounded-xl flex items-center justify-between text-xs text-blue-900">
+          {/* <div className="p-4 bg-blue-50 border border-blue-200 rounded-xl flex items-center justify-between text-xs text-blue-900">
             <div className="flex items-center gap-2">
               <Lock className="w-4 h-4 text-[#0256B3]" />
               <span className="font-extrabold">Simulated Secure Payment on Delivery / Demo</span>
@@ -230,14 +230,14 @@ export default function CheckoutPage() {
             <span className="font-extrabold text-[10px] bg-white px-2 py-0.5 rounded border border-blue-200">
               FREE TEST ORDER
             </span>
-          </div>
+          </div> */}
 
           <button
             type="submit"
             disabled={isSubmitting}
             className="w-full bg-[#0256B3] hover:bg-blue-700 disabled:opacity-50 text-white font-black text-xs py-4 px-6 rounded-xl shadow-lg uppercase tracking-wider transition-all"
           >
-            {isSubmitting ? "Placing Order..." : `Complete Order ($${subtotal.toFixed(2)})`}
+            {isSubmitting ? "Placing Order..." : `Complete Order (₹${subtotal.toFixed(2)})`}
           </button>
         </form>
 
@@ -257,7 +257,7 @@ export default function CheckoutPage() {
                   <h4 className="font-extrabold text-slate-900 uppercase truncate">{item.name}</h4>
                   <p className="text-slate-500 text-[11px]">Qty: {item.quantity} • {item.scale}</p>
                 </div>
-                <span className="font-extrabold text-slate-900">${(item.price * item.quantity).toFixed(2)}</span>
+                <span className="font-extrabold text-slate-900">₹{(item.price * item.quantity).toFixed(2)}</span>
               </div>
             ))}
           </div>
@@ -267,15 +267,15 @@ export default function CheckoutPage() {
           <div className="space-y-1.5 text-xs text-slate-600">
             <div className="flex justify-between">
               <span>Subtotal</span>
-              <span className="font-bold text-slate-900">${subtotal.toFixed(2)}</span>
+              <span className="font-bold text-slate-900">₹{subtotal.toFixed(2)}</span>
             </div>
-            <div className="flex justify-between">
+            {/* <div className="flex justify-between">
               <span>Shipping</span>
               <span className="font-bold text-emerald-600">FREE EXPRESS</span>
-            </div>
+            </div> */}
             <div className="pt-2 border-t border-slate-200 flex justify-between text-sm font-black text-slate-900">
               <span>Total Amount</span>
-              <span className="text-[#0256B3]">${subtotal.toFixed(2)}</span>
+              <span className="text-[#0256B3]">₹{subtotal.toFixed(2)}</span>
             </div>
           </div>
         </div>
