@@ -1,0 +1,59 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --brand-red: #C8102E;
+    --brand-dark: #1A1A2E;
+  }
+
+  body {
+    @apply bg-white text-slate-900 antialiased;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  }
+
+  ::selection {
+    @apply bg-red-600 text-white;
+  }
+}
+
+/* Scrollbar hide for horizontal navs */
+.scrollbar-none {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+
+/* Range input styling */
+input[type=range] {
+  @apply h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer;
+  accent-color: var(--brand-red);
+}
+
+/* Custom badge styles */
+.badge-discount {
+  @apply text-[10px] font-extrabold uppercase px-2 py-0.5 rounded shadow-sm tracking-wider;
+  background: var(--brand-red);
+  color: white;
+}
+
+.badge-new {
+  @apply text-[10px] font-extrabold uppercase px-2 py-0.5 rounded shadow-sm tracking-wider;
+  background: var(--brand-dark);
+  color: white;
+}
+
+.badge-stock {
+  @apply bg-emerald-600 text-white text-[10px] font-extrabold uppercase px-2 py-0.5 rounded shadow-sm tracking-wider;
+}
+
+/* Line clamp utility */
+.line-clamp-2 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
