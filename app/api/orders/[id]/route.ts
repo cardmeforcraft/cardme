@@ -48,3 +48,21 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
     return NextResponse.json({ success: false, message: error.message || "Failed to update order" }, { status: 500 });
   }
 }
+
+export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
+  try {
+    await connectToDatabase();
+    const { id } = params;
+    
+    const deletedOrder = await Order.findByIdAndDelete(id);
+    
+    if (!deletedOrder) {
+      return NextResponse.json({ success: false, message: "Order not found" }, { status: 404 });
+    }
+    
+    return NextResponse.json({ success: true, message: "Order deleted successfully" });
+  } catch (error: any) {
+    console.error("Order delete error:", error);
+    return NextResponse.json({ success: false, message: error.message || "Failed to delete order" }, { status: 500 });
+  }
+}

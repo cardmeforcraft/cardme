@@ -17,69 +17,7 @@ export default function Footer() {
     <footer className="bg-[#080808] text-white border-t border-white/5">
       <div className="max-w-7xl mx-auto px-5 sm:px-6 lg:px-8">
 
-        {/* ================= FEATURE BADGES ================= */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 border-b border-white/10">
-          
-          {/* Shipping */}
-          <div className="py-7 flex items-center gap-4 border-r border-white/10 pr-5">
-            <div className="w-11 h-11 rounded-full bg-[#C8102E]/10 flex items-center justify-center shrink-0">
-              <Truck className="w-5 h-5 text-[#C8102E]" />
-            </div>
-            <div>
-              <h4 className="text-sm font-bold uppercase tracking-wide">
-                Express Shipping
-              </h4>
-              <p className="text-xs text-slate-500 mt-1">
-                Fast worldwide delivery
-              </p>
-            </div>
-          </div>
-
-          {/* Authentic */}
-          <div className="py-7 flex items-center gap-4 lg:border-r border-white/10 px-5">
-            <div className="w-11 h-11 rounded-full bg-[#C8102E]/10 flex items-center justify-center shrink-0">
-              <ShieldCheck className="w-5 h-5 text-[#C8102E]" />
-            </div>
-            <div>
-              <h4 className="text-sm font-bold uppercase tracking-wide">
-                100% Authentic
-              </h4>
-              <p className="text-xs text-slate-500 mt-1">
-                Official diecast licensing
-              </p>
-            </div>
-          </div>
-
-          {/* Returns */}
-          <div className="py-7 flex items-center gap-4 border-r border-white/10 pr-5 pl-5">
-            <div className="w-11 h-11 rounded-full bg-[#C8102E]/10 flex items-center justify-center shrink-0">
-              <RotateCcw className="w-5 h-5 text-[#C8102E]" />
-            </div>
-            <div>
-              <h4 className="text-sm font-bold uppercase tracking-wide">
-                Easy Returns
-              </h4>
-              <p className="text-xs text-slate-500 mt-1">
-                30 days money-back guarantee
-              </p>
-            </div>
-          </div>
-
-          {/* Support */}
-          <div className="py-7 flex items-center gap-4 pl-5">
-            <div className="w-11 h-11 rounded-full bg-[#C8102E]/10 flex items-center justify-center shrink-0">
-              <Mail className="w-5 h-5 text-[#C8102E]" />
-            </div>
-            <div>
-              <h4 className="text-sm font-bold uppercase tracking-wide">
-                24/7 Support
-              </h4>
-              <p className="text-xs text-slate-500 mt-1">
-                Dedicated collector assistance
-              </p>
-            </div>
-          </div>
-        </div>
+        
 
 
         {/* ================= MAIN FOOTER ================= */}

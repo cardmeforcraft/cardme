@@ -136,7 +136,7 @@ export default function FilterSidebar({
       <div>
         <div className="flex items-center justify-between text-xs font-black uppercase text-slate-700 tracking-wider mb-2">
           <span>Price</span>
-          <span className="text-[#0256B3] font-extrabold text-xs">Up to ${filters.maxPrice}</span>
+          <span className="text-[#0256B3] font-extrabold text-xs">Up to ₹{filters.maxPrice}</span>
         </div>
         <input
           type="range"
@@ -148,8 +148,8 @@ export default function FilterSidebar({
           className="w-full"
         />
         <div className="flex items-center justify-between text-[10px] font-bold text-slate-400 mt-1">
-          <span>$0</span>
-          <span>$150+</span>
+          <span>₹0</span>
+          <span>₹150+</span>
         </div>
       </div>
 

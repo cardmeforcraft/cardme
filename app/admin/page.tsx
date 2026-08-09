@@ -142,6 +142,30 @@ export default function AdminPage() {
     }
   };
 
+  const handleDeleteOrder = async (id: string, orderNumber: string) => {
+    if (!confirm(`Are you sure you want to delete order '${orderNumber}'?`)) return;
+    
+    const previousOrders = [...orders];
+    setOrders(orders.filter(o => o._id !== id));
+    setStatusMsg(`Order '${orderNumber}' removed.`);
+
+    try {
+      const res = await fetch(`/api/orders/${id}`, { method: "DELETE" });
+      const data = await res.json();
+      if (data.success) {
+        setStatusMsg(`Order '${orderNumber}' removed successfully.`);
+        fetchData();
+      } else {
+        setOrders(previousOrders);
+        alert(`Failed to delete order: ${data.message || "Unknown error"}`);
+      }
+    } catch (e) {
+      console.error(e);
+      setOrders(previousOrders);
+      alert("Network error: Failed to delete order.");
+    }
+  };
+
   const handleEditClick = (product: any) => {
     setEditingId(product._id || product.slug);
     setFormData({
@@ -547,18 +571,27 @@ export default function AdminPage() {
                       <td className="p-3 font-semibold">{ord.items?.length || 1} diecast car(s)</td>
                       <td className="p-3 font-black text-slate-900">₹{ord.totalAmount?.toFixed(2)}</td>
                       <td className="p-3">
-                        <select
-                          value={ord.status || "Pending"}
-                          onChange={(e) => handleOrderStatusChange(ord._id, e.target.value)}
-                          className="bg-slate-50 border border-slate-200 text-slate-800 text-xs font-bold px-2 py-1 rounded focus:outline-none focus:ring-2 focus:ring-[#C8102E]"
-                        >
-                          <option value="Pending">Pending</option>
-                          <option value="Processing">Processing</option>
-                          <option value="Shipped">Shipped</option>
-                          <option value="Delivered">Delivered</option>
-                          <option value="Success">Success</option>
-                          <option value="Cancelled">Cancelled</option>
-                        </select>
+                        <div className="flex items-center gap-2">
+                          <select
+                            value={ord.status || "Pending"}
+                            onChange={(e) => handleOrderStatusChange(ord._id, e.target.value)}
+                            className="bg-slate-50 border border-slate-200 text-slate-800 text-xs font-bold px-2 py-1 rounded focus:outline-none focus:ring-2 focus:ring-[#C8102E]"
+                          >
+                            <option value="Pending">Pending</option>
+                            <option value="Processing">Processing</option>
+                            <option value="Shipped">Shipped</option>
+                            <option value="Delivered">Delivered</option>
+                            <option value="Success">Success</option>
+                            <option value="Cancelled">Cancelled</option>
+                          </select>
+                          <button
+                            onClick={() => handleDeleteOrder(ord._id, ord.orderNumber)}
+                            className="p-1.5 bg-slate-100 hover:bg-red-50 text-slate-700 hover:text-red-600 rounded-lg transition-colors"
+                            title="Delete Order"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))}
