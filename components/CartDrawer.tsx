@@ -129,10 +129,10 @@ export default function CartDrawer() {
                   <span>Subtotal</span>
                   <span className="font-extrabold text-slate-900">₹{subtotal.toFixed(2)}</span>
                 </div>
-                <div className="flex justify-between text-slate-500">
+                {/* <div className="flex justify-between text-slate-500">
                   <span>Estimated Shipping</span>
                   <span className="font-semibold text-emerald-600">FREE</span>
-                </div>
+                </div> */}
                 <div className="pt-2 border-t border-slate-200 flex justify-between text-sm font-black text-slate-900">
                   <span>Total</span>
                   <span className="text-[#C8102E]">₹{subtotal.toFixed(2)}</span>

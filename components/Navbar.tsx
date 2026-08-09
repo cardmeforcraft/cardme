@@ -140,6 +140,7 @@ export default function Navbar({ initialLinks }: NavbarProps) {
             >
               CARD
             </span>
+          
             <span
               className="text-2xl sm:text-3xl font-black tracking-tight text-[#1A1A2E] group-hover:text-[#C8102E] transition-colors"
               style={{ fontFamily: "'Space Grotesk', sans-serif", fontStyle: "italic", color: "#C8102E" }}
