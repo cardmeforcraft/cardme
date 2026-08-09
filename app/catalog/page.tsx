@@ -1,10 +1,27 @@
 "use client";
 
-import React, { useState, useEffect, Suspense } from "react";
+import React, { useState, useEffect, useCallback, useRef, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import FilterSidebar, { FilterState } from "@/components/FilterSidebar";
 import ProductCard from "@/components/ProductCard";
 import { SlidersHorizontal, ArrowUpDown, ChevronLeft, ChevronRight, RefreshCw, Car } from "lucide-react";
+
+// ── Skeleton card for loading state ──────────────────────────────────────────
+function SkeletonCard() {
+  return (
+    <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden animate-pulse">
+      <div className="aspect-[4/3] bg-slate-200" />
+      <div className="p-4 space-y-3">
+        <div className="h-4 bg-slate-200 rounded w-3/4" />
+        <div className="h-3 bg-slate-100 rounded w-1/2" />
+        <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
+          <div className="h-5 bg-slate-200 rounded w-16" />
+          <div className="h-8 bg-slate-200 rounded w-16" />
+        </div>
+      </div>
+    </div>
+  );
+}
 
 function GarageCatalogContent() {
   const searchParams = useSearchParams();
@@ -17,42 +34,83 @@ function GarageCatalogContent() {
   });
 
   const [searchQuery, setSearchQuery] = useState(searchParams.get("search") || "");
+  const [debouncedSearch, setDebouncedSearch] = useState(searchQuery);
   const [sortBy, setSortBy] = useState("featured");
   const [products, setProducts] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
 
+  // Keep a ref to the latest AbortController so we can cancel stale requests
+  const abortRef = useRef<AbortController | null>(null);
+
+  // Sync URL params → state on navigation
   useEffect(() => {
     const scaleParam = searchParams.get("scale");
     const seriesParam = searchParams.get("series");
     const searchParam = searchParams.get("search");
-    if (scaleParam) setFilters((prev) => ({ ...prev, scale: scaleParam }));
-    if (seriesParam) setFilters((prev) => ({ ...prev, series: seriesParam }));
-    if (searchParam !== null) setSearchQuery(searchParam);
+    setFilters((prev) => ({
+      ...prev,
+      scale: scaleParam ?? prev.scale,
+      series: seriesParam ?? prev.series,
+    }));
+    if (searchParam !== null) {
+      setSearchQuery(searchParam);
+      setDebouncedSearch(searchParam);
+    }
+    setCurrentPage(1);
   }, [searchParams]);
 
-  const fetchProducts = async () => {
+  // Debounce the search input — only fires fetch 300ms after user stops typing
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchQuery);
+      setCurrentPage(1);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  const fetchProducts = useCallback(async (page: number) => {
+    // Cancel any in-flight request
+    if (abortRef.current) abortRef.current.abort();
+    const controller = new AbortController();
+    abortRef.current = controller;
+
     setIsLoading(true);
     try {
       const params = new URLSearchParams();
-      if (searchQuery) params.set("search", searchQuery);
+      if (debouncedSearch) params.set("search", debouncedSearch);
       if (filters.scale) params.set("scale", filters.scale);
       if (filters.series) params.set("series", filters.series);
       if (filters.color) params.set("color", filters.color);
       if (filters.maxPrice < 150) params.set("maxPrice", filters.maxPrice.toString());
       if (sortBy) params.set("sort", sortBy);
-      const res = await fetch(`/api/products?${params.toString()}`);
+      params.set("page", String(page));
+      params.set("limit", "24");
+
+      const res = await fetch(`/api/products?${params.toString()}`, {
+        signal: controller.signal,
+      });
       const data = await res.json();
-      if (data.success) setProducts(data.products || []);
-    } catch (e) {
-      console.error("Failed to load products", e);
+      if (data.success) {
+        setProducts(data.products || []);
+        setTotalPages(data.totalPages ?? 1);
+        setTotalCount(data.total ?? 0);
+      }
+    } catch (e: any) {
+      if (e.name !== "AbortError") {
+        console.error("Failed to load products", e);
+      }
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [debouncedSearch, filters, sortBy]);
 
-  useEffect(() => { fetchProducts(); }, [filters, searchQuery, sortBy]);
+  useEffect(() => {
+    fetchProducts(currentPage);
+  }, [fetchProducts, currentPage]);
 
   const handleFilterChange = (newFilters: Partial<FilterState>) => {
     setFilters((prev) => ({ ...prev, ...newFilters }));
@@ -62,8 +120,22 @@ function GarageCatalogContent() {
   const handleClearFilters = () => {
     setFilters({ scale: "", series: "", color: "", maxPrice: 150 });
     setSearchQuery("");
+    setDebouncedSearch("");
     setCurrentPage(1);
   };
+
+  // Build pagination page numbers
+  const pageNumbers = (() => {
+    if (totalPages <= 7) return Array.from({ length: totalPages }, (_, i) => i + 1);
+    const pages: (number | "...")[] = [1];
+    if (currentPage > 3) pages.push("...");
+    const start = Math.max(2, currentPage - 1);
+    const end = Math.min(totalPages - 1, currentPage + 1);
+    for (let i = start; i <= end; i++) pages.push(i);
+    if (currentPage < totalPages - 2) pages.push("...");
+    pages.push(totalPages);
+    return pages;
+  })();
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
@@ -74,8 +146,8 @@ function GarageCatalogContent() {
         </button>
         <div className="flex items-center gap-2">
           <ArrowUpDown className="w-3.5 h-3.5 text-slate-400" />
-          <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} className="text-xs font-bold bg-slate-100 border border-slate-200 rounded-lg px-2.5 py-2 text-slate-800 focus:outline-none">
-            <option value="featured">Nearest to Scale</option>
+          <select value={sortBy} onChange={(e) => { setSortBy(e.target.value); setCurrentPage(1); }} className="text-xs font-bold bg-slate-100 border border-slate-200 rounded-lg px-2.5 py-2 text-slate-800 focus:outline-none">
+            <option value="featured">Newest First</option>
             <option value="price-asc">Price: Low to High</option>
             <option value="price-desc">Price: High to Low</option>
             <option value="name">Name A-Z</option>
@@ -88,19 +160,23 @@ function GarageCatalogContent() {
           <FilterSidebar filters={filters} onFilterChange={handleFilterChange} onClearFilters={handleClearFilters} />
         </div>
         <div className="lg:col-span-3 space-y-6">
+          {/* Toolbar */}
           <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div className="flex items-center gap-2 flex-wrap">
               <span className="text-xs font-extrabold uppercase text-slate-500 mr-1">Active:</span>
               {filters.scale && <span className="bg-[#0256B3] text-white text-xs font-bold px-2.5 py-1 rounded-full flex items-center gap-1 shadow-sm">{filters.scale}<button onClick={() => handleFilterChange({ scale: "" })} className="hover:text-amber-300 ml-1">×</button></span>}
               {filters.series && <span className="bg-blue-600 text-white text-xs font-bold px-2.5 py-1 rounded-full flex items-center gap-1 shadow-sm">Series: {filters.series}<button onClick={() => handleFilterChange({ series: "" })} className="hover:text-amber-300 ml-1">×</button></span>}
               {filters.color && <span className="bg-slate-800 text-white text-xs font-bold px-2.5 py-1 rounded-full flex items-center gap-1 shadow-sm">Color: {filters.color}<button onClick={() => handleFilterChange({ color: "" })} className="hover:text-amber-300 ml-1">×</button></span>}
-              {searchQuery && <span className="bg-amber-600 text-white text-xs font-bold px-2.5 py-1 rounded-full flex items-center gap-1 shadow-sm">Search: &quot;{searchQuery}&quot;<button onClick={() => setSearchQuery("")} className="hover:text-amber-300 ml-1">×</button></span>}
-              {!filters.scale && !filters.series && !filters.color && !searchQuery && <span className="text-xs text-slate-400 font-medium">All Models</span>}
+              {debouncedSearch && <span className="bg-amber-600 text-white text-xs font-bold px-2.5 py-1 rounded-full flex items-center gap-1 shadow-sm">Search: &quot;{debouncedSearch}&quot;<button onClick={() => { setSearchQuery(""); setDebouncedSearch(""); }} className="hover:text-amber-300 ml-1">×</button></span>}
+              {!filters.scale && !filters.series && !filters.color && !debouncedSearch && <span className="text-xs text-slate-400 font-medium">All Models</span>}
+              {totalCount > 0 && !isLoading && (
+                <span className="text-xs text-slate-400 font-medium ml-2">({totalCount} results)</span>
+              )}
             </div>
             <div className="hidden sm:flex items-center gap-2">
               <span className="text-xs font-bold text-slate-500 uppercase whitespace-nowrap">Sort by:</span>
-              <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} className="text-xs font-bold bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#0256B3]">
-                <option value="featured">Nearest to Scale</option>
+              <select value={sortBy} onChange={(e) => { setSortBy(e.target.value); setCurrentPage(1); }} className="text-xs font-bold bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#0256B3]">
+                <option value="featured">Newest First</option>
                 <option value="price-asc">Price: Low to High</option>
                 <option value="price-desc">Price: High to Low</option>
                 <option value="name">Name A-Z</option>
@@ -108,10 +184,10 @@ function GarageCatalogContent() {
             </div>
           </div>
 
+          {/* Product grid */}
           {isLoading ? (
-            <div className="h-64 flex flex-col items-center justify-center bg-white rounded-xl border border-slate-200">
-              <RefreshCw className="w-8 h-8 text-[#0256B3] animate-spin mb-2" />
-              <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Loading Diecast Collection...</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
+              {Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)}
             </div>
           ) : products.length === 0 ? (
             <div className="p-12 text-center bg-white rounded-xl border border-slate-200">
@@ -121,21 +197,62 @@ function GarageCatalogContent() {
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
-              {products.map((product) => (
-                <ProductCard key={product._id || product.slug} id={product._id || product.slug} name={product.name} slug={product.slug} brand={product.brand} scale={product.scale} series={product.series} price={product.price} originalPrice={product.originalPrice} images={product.images} color={product.color} badge={product.badge} />
+              {products.map((product, idx) => (
+                <ProductCard
+                  key={product._id || product.slug}
+                  id={product._id || product.slug}
+                  name={product.name}
+                  slug={product.slug}
+                  brand={product.brand}
+                  scale={product.scale}
+                  series={product.series}
+                  price={product.price}
+                  originalPrice={product.originalPrice}
+                  images={product.images}
+                  color={product.color}
+                  badge={product.badge}
+                  priority={idx < 6}
+                />
               ))}
             </div>
           )}
 
-          <div className="pt-6 flex items-center justify-center gap-1.5">
-            <button onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))} disabled={currentPage === 1} className="p-2 border border-slate-200 rounded-lg text-slate-600 hover:bg-slate-100 disabled:opacity-40"><ChevronLeft className="w-4 h-4" /></button>
-            {[1, 2, 3].map((n) => (
-              <button key={n} onClick={() => setCurrentPage(n)} className={`w-8 h-8 rounded-lg text-xs font-bold ${currentPage === n ? "bg-[#0256B3] text-white" : "border border-slate-200 text-slate-700 hover:bg-slate-100"}`}>{n}</button>
-            ))}
-            <span className="text-xs text-slate-400 font-bold px-1">...</span>
-            <button onClick={() => setCurrentPage(10)} className={`w-8 h-8 rounded-lg text-xs font-bold ${currentPage === 10 ? "bg-[#0256B3] text-white" : "border border-slate-200 text-slate-700 hover:bg-slate-100"}`}>10</button>
-            <button onClick={() => setCurrentPage((p) => p + 1)} className="p-2 border border-slate-200 rounded-lg text-slate-600 hover:bg-slate-100"><ChevronRight className="w-4 h-4" /></button>
-          </div>
+          {/* Real pagination */}
+          {totalPages > 1 && (
+            <div className="pt-6 flex items-center justify-center gap-1.5 flex-wrap">
+              <button
+                onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+                disabled={currentPage === 1}
+                className="p-2 border border-slate-200 rounded-lg text-slate-600 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                <ChevronLeft className="w-4 h-4" />
+              </button>
+              {pageNumbers.map((n, i) =>
+                n === "..." ? (
+                  <span key={`ellipsis-${i}`} className="px-1 text-slate-400 text-xs font-bold">…</span>
+                ) : (
+                  <button
+                    key={n}
+                    onClick={() => setCurrentPage(n as number)}
+                    className={`w-8 h-8 rounded-lg text-xs font-bold transition-colors ${
+                      currentPage === n
+                        ? "bg-[#0256B3] text-white shadow"
+                        : "border border-slate-200 text-slate-700 hover:bg-slate-100"
+                    }`}
+                  >
+                    {n}
+                  </button>
+                )
+              )}
+              <button
+                onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
+                disabled={currentPage === totalPages}
+                className="p-2 border border-slate-200 rounded-lg text-slate-600 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>
@@ -144,7 +261,27 @@ function GarageCatalogContent() {
 
 export default function CatalogPage() {
   return (
-    <Suspense fallback={<div className="h-64 flex flex-col items-center justify-center bg-white rounded-xl border border-slate-200"><RefreshCw className="w-8 h-8 text-[#0256B3] animate-spin mb-2" /><p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Loading Garage Catalog...</p></div>}>
+    <Suspense
+      fallback={
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <div key={i} className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden animate-pulse">
+                <div className="aspect-[4/3] bg-slate-200" />
+                <div className="p-4 space-y-3">
+                  <div className="h-4 bg-slate-200 rounded w-3/4" />
+                  <div className="h-3 bg-slate-100 rounded w-1/2" />
+                  <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
+                    <div className="h-5 bg-slate-200 rounded w-16" />
+                    <div className="h-8 bg-slate-200 rounded w-16" />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      }
+    >
       <GarageCatalogContent />
     </Suspense>
   );

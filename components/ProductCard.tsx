@@ -18,10 +18,11 @@ export interface ProductCardProps {
   images: string[];
   color: string;
   badge?: string;
+  priority?: boolean;
 }
 
 export default function ProductCard({
-  id, name, slug, brand, scale, series, price, originalPrice, images, color, badge,
+  id, name, slug, brand, scale, series, price, originalPrice, images, color, badge, priority = false,
 }: ProductCardProps) {
   const { addToCart } = useCart();
   const mainImage = images && images.length > 0 ? images[0] : "https://images.unsplash.com/photo-1617814076367-b759c7d7e738?auto=format&fit=crop&w=900&q=80";
@@ -52,7 +53,7 @@ export default function ProductCard({
             {scale.split(" ")[0]}
           </span>
         </div>
-        <Image src={mainImage} alt={name} fill sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw" className="object-cover group-hover:scale-105 transition-transform duration-500" unoptimized />
+        <Image src={mainImage} alt={name} fill sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw" className="object-cover group-hover:scale-105 transition-transform duration-500" priority={priority} />
         <div className="absolute inset-0 bg-slate-900/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
           <span className="bg-white/90 backdrop-blur text-slate-900 text-xs font-bold px-3 py-1.5 rounded-full flex items-center gap-1.5 shadow-lg">
             <Eye className="w-3.5 h-3.5" /> View Details

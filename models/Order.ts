@@ -19,7 +19,7 @@ export interface IOrder extends Document {
   zipCode: string;
   items: IOrderItem[];
   totalAmount: number;
-  status: "Pending" | "Processing" | "Shipped" | "Delivered" | "Cancelled";
+  status: "Pending" | "Processing" | "Shipped" | "Delivered" | "Success" | "Cancelled";
   createdAt: Date;
 }
 
@@ -45,14 +45,17 @@ const OrderSchema: Schema = new Schema<IOrder>(
     totalAmount: { type: Number, required: true },
     status: {
       type: String,
-      enum: ["Pending", "Processing", "Shipped", "Delivered", "Cancelled"],
+      enum: ["Pending", "Processing", "Shipped", "Delivered", "Success", "Cancelled"],
       default: "Pending",
     },
   },
   { timestamps: true }
 );
 
-const Order: Model<IOrder> =
-  mongoose.models.Order || mongoose.model<IOrder>("Order", OrderSchema);
+// Always delete the cached model in Next.js so schema changes take effect
+// without needing a full server restart (avoids stale enum errors in dev).
+if (mongoose.models.Order) delete mongoose.models.Order;
+
+const Order: Model<IOrder> = mongoose.model<IOrder>("Order", OrderSchema);
 
 export default Order;

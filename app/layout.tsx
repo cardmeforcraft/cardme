@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { CartProvider } from "@/context/CartContext";
-import Navbar from "@/components/Navbar";
+import NavbarWrapper from "@/components/NavbarWrapper";
 import Footer from "@/components/Footer";
 import CartDrawer from "@/components/CartDrawer";
 
@@ -34,7 +34,7 @@ export default function RootLayout({
       </head>
       <body className="min-h-screen flex flex-col justify-between bg-white text-slate-900 font-sans antialiased overflow-x-hidden">
         <CartProvider>
-          <Navbar />
+          <NavbarWrapper />
           <main className="flex-1 w-full overflow-x-hidden">
             {children}
           </main>

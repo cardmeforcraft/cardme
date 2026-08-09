@@ -1,4 +1,5 @@
-/* Navbar.tsx - Dynamic overflow navbar: extra categories collapse into "More" dropdown */
+/* Navbar.tsx - Dynamic overflow navbar: extra categories collapse into "More" dropdown
+   Receives initialLinks from NavbarWrapper (server component) — no client-side API fetch needed. */
 "use client";
 
 import React, { useState, useRef, useEffect, useCallback } from "react";
@@ -32,7 +33,13 @@ const MORE_BTN_W = 72;
 /** Gap between nav items matching Tailwind gap-5 = 20px */
 const GAP = 20;
 
-export default function Navbar() {
+interface NavbarProps {
+  /** Full list of nav links pre-computed by NavbarWrapper (server component).
+   *  Falls back to FIXED_LINKS if not provided. */
+  initialLinks?: NavLinkItem[];
+}
+
+export default function Navbar({ initialLinks }: NavbarProps) {
   const router = useRouter();
   const { totalItems, setIsCartOpen } = useCart();
   const [searchQuery, setSearchQuery] = useState("");
@@ -40,44 +47,8 @@ export default function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isMoreOpen, setIsMoreOpen] = useState(false);
 
-  // Dynamic scales and categories fetched from config API
-  const [categoryLinks, setCategoryLinks] = useState<NavLinkItem[]>(FIXED_LINKS);
-
-  // Fetch Scales and Categories from Admin panel config
-  useEffect(() => {
-    fetch("/api/config")
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.success) {
-          const fetchedLinks: NavLinkItem[] = [];
-
-          // Append Scales
-          if (data.scales && Array.isArray(data.scales)) {
-            data.scales.forEach((scale: string) => {
-              // Extract scale identifier (e.g. "1:64" from "1:64 (Standard)")
-              const cleanScale = scale.split(" ")[0] || scale;
-              fetchedLinks.push({
-                name: cleanScale.toUpperCase(),
-                href: `/catalog?scale=${encodeURIComponent(scale)}`,
-              });
-            });
-          }
-
-          // Append Categories/Series
-          if (data.categories && Array.isArray(data.categories)) {
-            data.categories.forEach((cat: string) => {
-              fetchedLinks.push({
-                name: cat.toUpperCase(),
-                href: `/catalog?series=${encodeURIComponent(cat)}`,
-              });
-            });
-          }
-
-          setCategoryLinks([...FIXED_LINKS, ...fetchedLinks]);
-        }
-      })
-      .catch((err) => console.error("Error loading navbar config:", err));
-  }, []);
+  // Use server-provided links immediately — no loading flash
+  const categoryLinks = initialLinks ?? FIXED_LINKS;
 
   /** How many items are shown directly; the rest go into "More" */
   const [visibleCount, setVisibleCount] = useState(categoryLinks.length);
@@ -97,10 +68,9 @@ export default function Navbar() {
     for (let i = 0; i < widths.length; i++) {
       const gap = i === 0 ? 0 : GAP;
       const isLast = i === widths.length - 1;
-      // If this might not be the last visible item, reserve space for "More"
       const needed = isLast && count === i
-        ? used + gap + widths[i]                        // all items fit — no More btn
-        : used + gap + widths[i] + GAP + MORE_BTN_W;   // need More btn after
+        ? used + gap + widths[i]
+        : used + gap + widths[i] + GAP + MORE_BTN_W;
       if (needed <= available) {
         used += gap + widths[i];
         count++;
@@ -118,7 +88,7 @@ export default function Navbar() {
     ro.observe(el);
     recalculate();
     return () => ro.disconnect();
-  }, [recalculate, categoryLinks]);
+  }, [recalculate]);
 
   /** Close "More" dropdown on outside click */
   useEffect(() => {
@@ -279,15 +249,10 @@ export default function Navbar() {
 
       {/* ── Desktop overflow-aware nav ─────────────────────────────────────── */}
       <nav className="hidden md:block border-t border-slate-200 bg-white py-2.5 px-4">
-        {/*
-          navRef container is used to measure available width.
-          overflow-hidden prevents any flash of overflowing items.
-        */}
         <div
           ref={navRef}
           className="max-w-7xl mx-auto flex items-center gap-5 text-[11px] font-bold tracking-wider text-slate-600 uppercase overflow-hidden"
         >
-          {/* Render ALL items; hide the ones that overflow via "block"/"hidden" */}
           {categoryLinks.map((link, idx) => (
             <Link
               key={idx}
@@ -321,7 +286,6 @@ export default function Navbar() {
                 />
               </button>
 
-              {/* Dropdown panel */}
               {isMoreOpen && (
                 <div className="absolute left-0 top-full mt-2 min-w-[200px] bg-white border border-slate-200 rounded-xl shadow-xl z-50 overflow-hidden animate-in fade-in slide-in-from-top-1 duration-150">
                   {moreLinks.map((link, idx) => (

@@ -3,9 +3,23 @@ import { connectToDatabase } from "@/lib/mongodb";
 import Product from "@/models/Product";
 import { INITIAL_PRODUCTS } from "@/lib/seedData";
 
+// Track whether we've seeded in this server process — avoids a countDocuments
+// round-trip on every single request.
+let seeded = false;
+
+async function ensureSeeded() {
+  if (seeded) return;
+  const count = await Product.countDocuments();
+  if (count === 0) {
+    await Product.insertMany(INITIAL_PRODUCTS);
+  }
+  seeded = true;
+}
+
 export async function GET(req: NextRequest) {
   try {
     await connectToDatabase();
+    await ensureSeeded();
 
     const { searchParams } = new URL(req.url);
     const search = searchParams.get("search") || "";
@@ -14,12 +28,8 @@ export async function GET(req: NextRequest) {
     const color = searchParams.get("color");
     const maxPrice = searchParams.get("maxPrice");
     const sort = searchParams.get("sort") || "featured";
-
-    // Auto-seed database if empty on page access
-    const count = await Product.countDocuments();
-    if (count === 0) {
-      await Product.insertMany(INITIAL_PRODUCTS);
-    }
+    const page = Math.max(1, parseInt(searchParams.get("page") || "1", 10));
+    const limit = Math.min(48, Math.max(1, parseInt(searchParams.get("limit") || "24", 10)));
 
     const query: any = {};
     if (search) {
@@ -40,11 +50,26 @@ export async function GET(req: NextRequest) {
     else if (sort === "scale") sortOptions = { scale: 1 };
     else if (sort === "name") sortOptions = { name: 1 };
 
-    const products = await Product.find(query).sort(sortOptions).exec();
-    return NextResponse.json({ success: true, products, total: products.length, source: "mongodb" });
+    const skip = (page - 1) * limit;
+
+    // Run count and data fetch in parallel for speed
+    const [total, products] = await Promise.all([
+      Product.countDocuments(query),
+      Product.find(query).sort(sortOptions).skip(skip).limit(limit).lean().exec(),
+    ]);
+
+    const totalPages = Math.max(1, Math.ceil(total / limit));
+
+    return NextResponse.json(
+      { success: true, products, total, page, totalPages, limit, source: "mongodb" },
+      { headers: { "Cache-Control": "s-maxage=30, stale-while-revalidate=120" } }
+    );
   } catch (error: any) {
     console.error("MongoDB products query error:", error);
-    return NextResponse.json({ success: false, message: error.message || "Database connection error" }, { status: 500 });
+    return NextResponse.json(
+      { success: false, message: error.message || "Database connection error" },
+      { status: 500 }
+    );
   }
 }
 
@@ -79,10 +104,16 @@ export async function POST(req: NextRequest) {
       stockCount: body.stockCount ? parseInt(body.stockCount) : 20,
     });
 
+    // Reset the seeded flag so new product is visible on next fetch
+    seeded = false;
+
     await newProduct.save();
     return NextResponse.json({ success: true, product: newProduct }, { status: 201 });
   } catch (error: any) {
     console.error("MongoDB product creation error:", error);
-    return NextResponse.json({ success: false, message: error.message || "Database insertion error" }, { status: 500 });
+    return NextResponse.json(
+      { success: false, message: error.message || "Database insertion error" },
+      { status: 500 }
+    );
   }
 }

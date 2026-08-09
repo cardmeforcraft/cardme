@@ -5,7 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import {
   Plus, Trash2, Edit3, ShieldCheck, RefreshCw, Car, ShoppingBag,
-  CheckCircle, Search, Sparkles, Upload, Tags, Layers,
+  CheckCircle, Search, Sparkles, Upload, Tags, Layers, Phone,
 } from "lucide-react";
 
 export default function AdminPage() {
@@ -43,6 +43,12 @@ export default function AdminPage() {
   const [configSaving, setConfigSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
 
+  // WhatsApp number config
+  const [whatsappNumber, setWhatsappNumber] = useState(""); // stored with 91 prefix
+  const [whatsappInput, setWhatsappInput] = useState("");   // 10-digit user input
+  const [whatsappSaving, setWhatsappSaving] = useState(false);
+  const [whatsappError, setWhatsappError] = useState("");
+
   const fetchData = async () => {
     setLoading(true);
     try {
@@ -60,6 +66,10 @@ export default function AdminPage() {
       if (cfgData.success) {
         setScales(cfgData.scales || []);
         setCategories(cfgData.categories || []);
+        const stored = cfgData.whatsappNumber || "917907343387";
+        setWhatsappNumber(stored);
+        // Display only the last 10 digits (strip country code 91)
+        setWhatsappInput(stored.startsWith("91") ? stored.slice(2) : stored);
       }
     } catch (e) {
       console.error("Failed to load admin data", e);
@@ -94,6 +104,26 @@ export default function AdminPage() {
       }
     } catch (e) {
       console.error(e);
+    }
+  };
+
+  const handleOrderStatusChange = async (orderId: string, newStatus: string) => {
+    try {
+      const res = await fetch(`/api/orders/${orderId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: newStatus }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setStatusMsg(`Order status updated to ${newStatus}.`);
+        fetchData();
+      } else {
+        alert("Failed to update order status: " + data.message);
+      }
+    } catch (e) {
+      console.error(e);
+      alert("Error updating order status");
     }
   };
 
@@ -469,9 +499,18 @@ export default function AdminPage() {
                       <td className="p-3 font-semibold">{ord.items?.length || 1} diecast car(s)</td>
                       <td className="p-3 font-black text-slate-900">₹{ord.totalAmount?.toFixed(2)}</td>
                       <td className="p-3">
-                        <span className="bg-amber-100 text-amber-800 text-[10px] font-extrabold px-2 py-0.5 rounded-full">
-                          {ord.status || "Pending"}
-                        </span>
+                        <select
+                          value={ord.status || "Pending"}
+                          onChange={(e) => handleOrderStatusChange(ord._id, e.target.value)}
+                          className="bg-slate-50 border border-slate-200 text-slate-800 text-xs font-bold px-2 py-1 rounded focus:outline-none focus:ring-2 focus:ring-[#C8102E]"
+                        >
+                          <option value="Pending">Pending</option>
+                          <option value="Processing">Processing</option>
+                          <option value="Shipped">Shipped</option>
+                          <option value="Delivered">Delivered</option>
+                          <option value="Success">Success</option>
+                          <option value="Cancelled">Cancelled</option>
+                        </select>
                       </td>
                     </tr>
                   ))}
@@ -660,6 +699,19 @@ export default function AdminPage() {
                 className="w-full px-3.5 py-2 text-sm bg-slate-50 border border-slate-200 rounded-lg"
               />
             </div>
+
+            <div>
+              <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Stock Count *</label>
+              <input
+                type="number"
+                min="0"
+                required
+                placeholder="25"
+                value={formData.stockCount}
+                onChange={(e) => setFormData({ ...formData, stockCount: e.target.value })}
+                className="w-full px-3.5 py-2 text-sm bg-slate-50 border border-slate-200 rounded-lg"
+              />
+            </div>
           </div>
 
           <button
@@ -672,9 +724,94 @@ export default function AdminPage() {
         </form>
       )}
 
-      {/* ── TAB 4: CATEGORIES & SCALES MANAGER ───────────────────────────────── */}
+      {/* ── TAB 4: CATEGORIES, SCALES & WHATSAPP MANAGER ─────────────────────── */}
       {activeTab === "config" && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="space-y-6">
+
+          {/* ── WHATSAPP NUMBER PANEL ───────────────────────────────────────── */}
+          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+            <div className="p-5 border-b border-slate-100 flex items-center gap-3">
+              <div className="p-2.5 bg-green-50 rounded-xl">
+                <Phone className="w-5 h-5 text-[#25D366]" />
+              </div>
+              <div>
+                <h2 className="text-sm font-black uppercase text-slate-900">WhatsApp Order Number</h2>
+                <p className="text-[11px] text-slate-400">
+                  New orders will be sent to this number via WhatsApp
+                </p>
+              </div>
+            </div>
+            <div className="p-5">
+              <div className="flex gap-3 items-start">
+                <div className="flex-1">
+                  <div className="flex items-center border border-slate-200 rounded-lg overflow-hidden bg-slate-50 focus-within:ring-2 focus-within:ring-[#25D366] focus-within:border-[#25D366]">
+                    <span className="px-3 py-2.5 text-xs font-black text-slate-500 bg-slate-100 border-r border-slate-200 shrink-0">+91</span>
+                    <input
+                      type="tel"
+                      maxLength={10}
+                      placeholder="Enter 10-digit mobile number"
+                      value={whatsappInput}
+                      onChange={(e) => {
+                        const val = e.target.value.replace(/\D/g, "").slice(0, 10);
+                        setWhatsappInput(val);
+                        setWhatsappError("");
+                      }}
+                      className="flex-1 px-3 py-2.5 text-sm bg-transparent focus:outline-none font-mono tracking-widest"
+                    />
+                    <span className={`px-3 text-xs font-bold shrink-0 ${
+                      whatsappInput.length === 10 ? "text-emerald-600" : "text-slate-300"
+                    }`}>
+                      {whatsappInput.length}/10
+                    </span>
+                  </div>
+                  {whatsappError && (
+                    <p className="text-[11px] text-red-600 font-bold mt-1">{whatsappError}</p>
+                  )}
+                  {whatsappNumber && (
+                    <p className="text-[11px] text-slate-400 mt-1">
+                      Current: <span className="font-black text-slate-700">+{whatsappNumber}</span>
+                    </p>
+                  )}
+                </div>
+                <button
+                  disabled={whatsappSaving || whatsappInput.length !== 10}
+                  onClick={async () => {
+                    if (whatsappInput.length !== 10) {
+                      setWhatsappError("Please enter exactly 10 digits.");
+                      return;
+                    }
+                    setWhatsappSaving(true);
+                    setWhatsappError("");
+                    try {
+                      const res = await fetch("/api/config", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ whatsappNumber: whatsappInput }),
+                      });
+                      const data = await res.json();
+                      if (data.success) {
+                        setWhatsappNumber(data.whatsappNumber);
+                        setStatusMsg(`WhatsApp number updated to +${data.whatsappNumber}`);
+                      } else {
+                        setWhatsappError(data.message || "Failed to save number");
+                      }
+                    } catch {
+                      setWhatsappError("Network error. Try again.");
+                    } finally {
+                      setWhatsappSaving(false);
+                    }
+                  }}
+                  className="flex items-center gap-1.5 px-5 py-2.5 bg-[#25D366] hover:bg-green-500 disabled:opacity-40 text-white text-xs font-black rounded-lg transition-colors shadow-sm whitespace-nowrap"
+                >
+                  {whatsappSaving ? <RefreshCw className="w-4 h-4 animate-spin" /> : <CheckCircle className="w-4 h-4" />}
+                  Save Number
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* ── SCALES & CATEGORIES GRID ────────────────────────────────────── */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
           {/* ── SCALES PANEL ──────────────────────────────────────── */}
           <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
@@ -810,6 +947,7 @@ export default function AdminPage() {
               To also update the navbar quick-links, add items matching your scale/category names there.
             </div>
           </div>
+        </div>
         </div>
       )}
     </div>
