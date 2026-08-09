@@ -5,22 +5,33 @@ import Image from "next/image";
 import Link from "next/link";
 import { X, ShoppingBag, Trash2, Plus, Minus, ArrowRight } from "lucide-react";
 import { useCart } from "@/context/CartContext";
+import { motion, AnimatePresence } from "framer-motion";
 
 export default function CartDrawer() {
   const { cart, isCartOpen, setIsCartOpen, removeFromCart, updateQuantity, subtotal, totalItems } = useCart();
 
-  if (!isCartOpen) return null;
-
   return (
-    <div className="fixed inset-0 z-50 overflow-hidden">
-      {/* Backdrop */}
-      <div
-        onClick={() => setIsCartOpen(false)}
-        className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity"
-      />
+    <AnimatePresence>
+      {isCartOpen && (
+        <div className="fixed inset-0 z-50 overflow-hidden">
+          {/* Backdrop */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
+            onClick={() => setIsCartOpen(false)}
+            className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity cursor-pointer"
+          />
 
-      <div className="fixed inset-y-0 right-0 w-full sm:w-auto flex pl-0 sm:pl-10">
-        <div className="w-full sm:w-screen sm:max-w-md bg-white shadow-2xl flex flex-col justify-between">
+          <div className="fixed inset-y-0 right-0 w-full sm:w-auto flex pl-0 sm:pl-10">
+            <motion.div
+              initial={{ x: "100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "100%" }}
+              transition={{ type: "spring", damping: 25, stiffness: 220 }}
+              className="w-full sm:w-screen sm:max-w-md bg-white shadow-2xl flex flex-col justify-between"
+            >
           {/* Header */}
           <div className="p-4 sm:p-5 border-b border-slate-200 flex items-center justify-between bg-slate-50">
             <div className="flex items-center gap-2">
@@ -149,8 +160,10 @@ export default function CartDrawer() {
               </Link>
             </div>
           )}
-        </div>
+        </motion.div>
       </div>
     </div>
+      )}
+    </AnimatePresence>
   );
 }

@@ -5,7 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import {
   Plus, Trash2, Edit3, ShieldCheck, RefreshCw, Car, ShoppingBag,
-  CheckCircle, Search, Sparkles, Upload, Tags, Layers, Phone,
+  CheckCircle, Search, Sparkles, Upload, Tags, Layers, Phone, LogOut,
 } from "lucide-react";
 
 export default function AdminPage() {
@@ -29,7 +29,7 @@ export default function AdminPage() {
     originalPrice: "",
     color: "Silver",
     badge: "NEW ARRIVAL",
-    image: "",
+    images: [] as string[],
     description: "",
     features: "1:32 Scale Diecast Model, 2 Doors Openable, Metal Alloy Body",
     stockCount: "25",
@@ -53,9 +53,9 @@ export default function AdminPage() {
     setLoading(true);
     try {
       const [prodRes, orderRes, cfgRes] = await Promise.all([
-        fetch("/api/products"),
-        fetch("/api/orders"),
-        fetch("/api/config"),
+        fetch(`/api/products?_t=${Date.now()}`, { cache: "no-store" }),
+        fetch(`/api/orders?_t=${Date.now()}`, { cache: "no-store" }),
+        fetch(`/api/config?_t=${Date.now()}`, { cache: "no-store" }),
       ]);
       const prodData = await prodRes.json();
       const orderData = await orderRes.json();
@@ -95,15 +95,30 @@ export default function AdminPage() {
 
   const handleDeleteProduct = async (id: string, name: string) => {
     if (!confirm(`Are you sure you want to delete '${name}' from inventory?`)) return;
+    
+    // Save current products list in case we need to roll back
+    const previousProducts = [...products];
+    
+    // Optimistically update the UI immediately
+    setProducts(products.filter(p => (p._id || p.slug) !== id));
+    setStatusMsg(`Product '${name}' removed.`);
+
     try {
       const res = await fetch(`/api/products/${id}`, { method: "DELETE" });
       const data = await res.json();
       if (data.success) {
         setStatusMsg(`Product '${name}' removed successfully.`);
         fetchData();
+      } else {
+        // Rollback state if backend deletion failed
+        setProducts(previousProducts);
+        alert(`Failed to delete product: ${data.message || "Unknown error"}`);
       }
     } catch (e) {
       console.error(e);
+      // Rollback state on connection/network error
+      setProducts(previousProducts);
+      alert("Network error: Failed to delete product.");
     }
   };
 
@@ -138,7 +153,7 @@ export default function AdminPage() {
       originalPrice: product.originalPrice ? String(product.originalPrice) : "",
       color: product.color || "Silver",
       badge: product.badge || "NEW ARRIVAL",
-      image: product.images?.[0] || "",
+      images: product.images || (product.images?.[0] ? [product.images[0]] : []),
       description: product.description || "",
       features: Array.isArray(product.features) ? product.features.join(", ") : "",
       stockCount: product.stockCount ? String(product.stockCount) : "25",
@@ -147,30 +162,52 @@ export default function AdminPage() {
   };
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
+    const files = e.target.files;
+    if (files && files.length > 0) {
       setUploading(true);
       setStatusMsg("");
-      const formDataObj = new FormData();
-      formDataObj.append("file", file);
       try {
-        const res = await fetch("/api/upload", {
-          method: "POST",
-          body: formDataObj,
+        const uploadPromises = Array.from(files).map(async (file) => {
+          const formDataObj = new FormData();
+          formDataObj.append("file", file);
+          const res = await fetch("/api/upload", {
+            method: "POST",
+            body: formDataObj,
+          });
+          const data = await res.json();
+          if (data.success) {
+            return data.url as string;
+          } else {
+            throw new Error(data.message || "Failed to upload file");
+          }
         });
-        const data = await res.json();
-        if (data.success) {
-          setFormData((prev) => ({ ...prev, image: data.url }));
-          setStatusMsg("Image uploaded successfully!");
-        } else {
-          alert("Upload failed: " + data.message);
-        }
+
+        const urls = await Promise.all(uploadPromises);
+        setFormData((prev) => ({
+          ...prev,
+          images: [...prev.images, ...urls],
+        }));
+        setStatusMsg(`Successfully uploaded ${urls.length} image(s)!`);
       } catch (error: any) {
-        console.error("Error uploading image:", error);
-        alert("Error uploading image: " + error.message);
+        console.error("Error uploading images:", error);
+        alert("Error uploading images: " + error.message);
       } finally {
         setUploading(false);
       }
+    }
+  };
+
+  const handleLogout = async () => {
+    if (!confirm("Are you sure you want to log out?")) return;
+    try {
+      const res = await fetch("/api/auth/logout", { method: "POST" });
+      const data = await res.json();
+      if (data.success) {
+        window.location.href = "/admin/login";
+      }
+    } catch (e) {
+      console.error(e);
+      alert("Logout failed");
     }
   };
 
@@ -186,7 +223,7 @@ export default function AdminPage() {
         price: parseFloat(formData.price),
         originalPrice: formData.originalPrice ? parseFloat(formData.originalPrice) : undefined,
         stockCount: parseInt(formData.stockCount || "25"),
-        images: [formData.image || "https://images.unsplash.com/photo-1617814076367-b759c7d7e738?auto=format&fit=crop&w=900&q=80"],
+        images: formData.images.length > 0 ? formData.images : ["https://images.unsplash.com/photo-1617814076367-b759c7d7e738?auto=format&fit=crop&w=900&q=80"],
         features: formData.features.split(",").map((f) => f.trim()).filter(Boolean),
       };
 
@@ -211,7 +248,7 @@ export default function AdminPage() {
           originalPrice: "",
           color: "Silver",
           badge: "NEW ARRIVAL",
-          image: "",
+          images: [],
           description: "",
           features: "1:32 Scale Diecast Model, 2 Doors Openable, Metal Alloy Body",
           stockCount: "25",
@@ -349,30 +386,41 @@ export default function AdminPage() {
             Categories &amp; Scales
           </button>
         </div>
-        <button
-          onClick={() => {
-            setEditingId(null);
-            setFormData({
-              name: "",
-              brand: "Diecast Elite",
-              scale: "1:64 (Standard)",
-              series: "Street / Track",
-              price: "",
-              originalPrice: "",
-              color: "Silver",
-              badge: "NEW ARRIVAL",
-              image: "",
-              description: "",
-              features: "1:32 Scale Diecast Model, 2 Doors Openable, Metal Alloy Body",
-              stockCount: "25",
-            });
-            setActiveTab("add");
-          }}
-          className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-black px-4 py-2 rounded-lg flex items-center gap-1.5 uppercase shadow"
-        >
-          <Plus className="w-4 h-4" />
-          <span>Add New Car</span>
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => {
+              setEditingId(null);
+              setFormData({
+                name: "",
+                brand: "Diecast Elite",
+                scale: "1:64 (Standard)",
+                series: "Street / Track",
+                price: "",
+                originalPrice: "",
+                color: "Silver",
+                badge: "NEW ARRIVAL",
+                images: [],
+                description: "",
+                features: "1:32 Scale Diecast Model, 2 Doors Openable, Metal Alloy Body",
+                stockCount: "25",
+              });
+              setActiveTab("add");
+            }}
+            className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-black px-4 py-2 rounded-lg flex items-center gap-1.5 uppercase shadow"
+          >
+            <Plus className="w-4 h-4" />
+            <span>Add New Car</span>
+          </button>
+          
+          <button
+            onClick={handleLogout}
+            className="bg-slate-700 hover:bg-slate-800 text-white text-xs font-black px-4 py-2 rounded-lg flex items-center gap-1.5 uppercase shadow"
+            title="Log Out"
+          >
+            <LogOut className="w-4 h-4" />
+            <span>Logout</span>
+          </button>
+        </div>
       </div>
 
       {/* ── TAB 1: PRODUCT INVENTORY ─────────────────────────────────────────── */}
@@ -628,7 +676,7 @@ export default function AdminPage() {
             {/* Image Upload */}
             <div className="sm:col-span-2 space-y-3 bg-slate-50 p-4 rounded-xl border border-slate-200">
               <label className="block text-xs font-black uppercase text-slate-800 tracking-wider">
-                Product Image (Upload File or Enter URL)
+                Product Images (Upload one or more Files, or Enter URL)
               </label>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 items-center">
                 {uploading ? (
@@ -639,38 +687,72 @@ export default function AdminPage() {
                 ) : (
                   <label className="flex items-center justify-center gap-2 w-full px-4 py-2.5 bg-white hover:bg-slate-100 text-slate-800 border-2 border-dashed border-slate-300 rounded-xl cursor-pointer text-xs font-bold transition-all shadow-sm">
                     <Upload className="w-4 h-4 text-[#C8102E]" />
-                    <span>Upload Image File from Device</span>
-                    <input type="file" accept="image/*" onChange={handleFileUpload} className="hidden" />
+                    <span>Upload Image Files (Multiple allowed)</span>
+                    <input type="file" accept="image/*" multiple onChange={handleFileUpload} className="hidden" />
                   </label>
                 )}
-                <input
-                  type="text"
-                  placeholder="OR paste Image URL (https://...)"
-                  value={formData.image}
-                  onChange={(e) => setFormData({ ...formData, image: e.target.value })}
-                  className="w-full px-3.5 py-2.5 text-xs bg-white border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#C8102E]"
-                  disabled={uploading}
-                />
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    id="newImageUrl"
+                    placeholder="OR enter Image URL and click +"
+                    className="flex-1 px-3.5 py-2.5 text-xs bg-white border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#C8102E]"
+                    disabled={uploading}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        const val = (e.target as HTMLInputElement).value.trim();
+                        if (val) {
+                          setFormData((prev) => ({ ...prev, images: [...prev.images, val] }));
+                          (e.target as HTMLInputElement).value = "";
+                        }
+                      }
+                    }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const input = document.getElementById("newImageUrl") as HTMLInputElement;
+                      const val = input?.value.trim();
+                      if (val) {
+                        setFormData((prev) => ({ ...prev, images: [...prev.images, val] }));
+                        input.value = "";
+                      }
+                    }}
+                    className="px-3.5 bg-slate-800 text-white rounded-xl hover:bg-slate-950 text-sm font-black"
+                  >
+                    +
+                  </button>
+                </div>
               </div>
-              {formData.image && (
-                <div className="flex items-center gap-3 pt-2">
-                  <div className="relative w-20 h-20 bg-white rounded-lg overflow-hidden border border-slate-300 shrink-0">
-                    <Image src={formData.image} alt="Uploaded preview" fill className="object-cover" unoptimized />
-                  </div>
-                  <div>
-                    <span className="text-xs font-bold text-emerald-700 flex items-center gap-1">
-                      <CheckCircle className="w-3.5 h-3.5" /> Image Ready
-                    </span>
-                    <p className="text-[11px] text-slate-400 mt-0.5 truncate max-w-xs">
-                      {formData.image.startsWith("data:") ? "Uploaded local image file" : formData.image}
-                    </p>
-                    <button
-                      type="button"
-                      onClick={() => setFormData({ ...formData, image: "" })}
-                      className="text-[11px] font-bold text-red-600 hover:underline mt-1"
-                    >
-                      Clear Image
-                    </button>
+
+              {formData.images && formData.images.length > 0 && (
+                <div className="space-y-2 pt-2">
+                  <span className="text-[11px] font-black uppercase text-slate-500 tracking-wider">
+                    Uploaded Previews ({formData.images.length}) - Order determines display sequence
+                  </span>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-3">
+                    {formData.images.map((url, index) => (
+                      <div key={index} className="relative aspect-square bg-white rounded-xl overflow-hidden border border-slate-300 group shadow-sm">
+                        <Image src={url} alt={`Preview ${index}`} fill className="object-cover" unoptimized />
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setFormData((prev) => ({
+                              ...prev,
+                              images: prev.images.filter((_, i) => i !== index),
+                            }));
+                          }}
+                          className="absolute top-1 right-1 bg-red-600 text-white rounded-full p-1 shadow-md hover:bg-red-700 transition-colors opacity-95"
+                          title="Remove image"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                        <span className="absolute bottom-1 left-1 bg-slate-900/75 backdrop-blur text-white text-[9px] font-bold px-1.5 py-0.5 rounded">
+                          {index === 0 ? "Main" : `#${index + 1}`}
+                        </span>
+                      </div>
+                    ))}
                   </div>
                 </div>
               )}

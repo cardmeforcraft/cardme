@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { ShoppingCart, Eye } from "lucide-react";
 import { useCart } from "@/context/CartContext";
+import { motion } from "framer-motion";
 
 export interface ProductCardProps {
   id: string;
@@ -41,7 +42,14 @@ export default function ProductCard({
   };
 
   return (
-    <div className="group bg-white rounded-xl border border-slate-200 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col justify-between overflow-hidden">
+    <motion.div
+      initial={{ opacity: 0, y: 15 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-40px" }}
+      transition={{ duration: 0.5, ease: "easeOut" }}
+      whileHover={{ y: -6 }}
+      className="group bg-white rounded-xl border border-slate-200 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col justify-between overflow-hidden"
+    >
       <Link href={`/product/${slug}`} className="block relative aspect-[4/3] bg-slate-100 overflow-hidden">
         {badge && (
           <div className="absolute top-2.5 right-2.5 z-10">
@@ -83,6 +91,6 @@ export default function ProductCard({
           </button>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }
