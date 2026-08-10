@@ -15,6 +15,7 @@ export interface IProduct extends Document {
   features: string[];
   inStock: boolean;
   stockCount: number;
+  isAdminAdded?: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -35,6 +36,7 @@ const ProductSchema: Schema = new Schema<IProduct>(
     features: { type: [String], default: [] },
     inStock: { type: Boolean, default: true },
     stockCount: { type: Number, default: 25 },
+    isAdminAdded: { type: Boolean, default: false },
   },
   { timestamps: true }
 );

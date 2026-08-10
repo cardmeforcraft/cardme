@@ -1,25 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/mongodb";
 import Product from "@/models/Product";
-import { INITIAL_PRODUCTS } from "@/lib/seedData";
-
-// Track whether we've seeded in this server process — avoids a countDocuments
-// round-trip on every single request.
-let seeded = false;
-
-async function ensureSeeded() {
-  if (seeded) return;
-  const count = await Product.countDocuments();
-  if (count === 0) {
-    await Product.insertMany(INITIAL_PRODUCTS);
-  }
-  seeded = true;
-}
-
 export async function GET(req: NextRequest) {
   try {
     await connectToDatabase();
-    await ensureSeeded();
 
     const { searchParams } = new URL(req.url);
     const search = searchParams.get("search") || "";
@@ -31,7 +15,7 @@ export async function GET(req: NextRequest) {
     const page = Math.max(1, parseInt(searchParams.get("page") || "1", 10));
     const limit = Math.min(48, Math.max(1, parseInt(searchParams.get("limit") || "24", 10)));
 
-    const query: any = {};
+    const query: any = { isAdminAdded: true };
     if (search) {
       query.$or = [
         { name: { $regex: search, $options: "i" } },
@@ -102,10 +86,8 @@ export async function POST(req: NextRequest) {
       features: Array.isArray(body.features) ? body.features : ["Authentic Diecast Metal", "Detailed Interior"],
       inStock: true,
       stockCount: body.stockCount ? parseInt(body.stockCount) : 20,
+      isAdminAdded: true,
     });
-
-    // Reset the seeded flag so new product is visible on next fetch
-    seeded = false;
 
     await newProduct.save();
     return NextResponse.json({ success: true, product: newProduct }, { status: 201 });

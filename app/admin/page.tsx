@@ -80,19 +80,6 @@ export default function AdminPage() {
 
   useEffect(() => { fetchData(); }, []);
 
-  const handleSeed = async () => {
-    if (!confirm("Are you sure you want to re-seed the catalog with default diecast car models?")) return;
-    setLoading(true);
-    try {
-      const res = await fetch("/api/seed");
-      const data = await res.json();
-      setStatusMsg(data.message || "Database seeded!");
-      fetchData();
-    } catch (e) {
-      console.error(e);
-    }
-  };
-
   const handleDeleteProduct = async (id: string, name: string) => {
     if (!confirm(`Are you sure you want to delete '${name}' from inventory?`)) return;
     

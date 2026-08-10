@@ -8,10 +8,10 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
     await connectToDatabase();
     let product = null;
     if (id.match(/^[0-9a-fA-F]{24}$/)) {
-      product = await Product.findById(id);
+      product = await Product.findOne({ _id: id, isAdminAdded: true });
     }
     if (!product) {
-      product = await Product.findOne({ slug: id });
+      product = await Product.findOne({ slug: id, isAdminAdded: true });
     }
     if (product) {
       return NextResponse.json({ success: true, product });
@@ -31,9 +31,9 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
     await connectToDatabase();
     let updated = null;
     if (id.match(/^[0-9a-fA-F]{24}$/)) {
-      updated = await Product.findByIdAndUpdate(id, body, { new: true });
+      updated = await Product.findOneAndUpdate({ _id: id, isAdminAdded: true }, body, { new: true });
     } else {
-      updated = await Product.findOneAndUpdate({ slug: id }, body, { new: true });
+      updated = await Product.findOneAndUpdate({ slug: id, isAdminAdded: true }, body, { new: true });
     }
     if (updated) {
       return NextResponse.json({ success: true, product: updated });
@@ -52,9 +52,9 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
     await connectToDatabase();
     let deleted = null;
     if (id.match(/^[0-9a-fA-F]{24}$/)) {
-      deleted = await Product.findByIdAndDelete(id);
+      deleted = await Product.findOneAndDelete({ _id: id, isAdminAdded: true });
     } else {
-      deleted = await Product.findOneAndDelete({ slug: id });
+      deleted = await Product.findOneAndDelete({ slug: id, isAdminAdded: true });
     }
     if (deleted) {
       return NextResponse.json({ success: true, message: "Product removed successfully" });
