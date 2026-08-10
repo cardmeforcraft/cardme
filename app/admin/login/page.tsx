@@ -213,7 +213,7 @@ export default function AdminLoginPage() {
                   type="text"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="e.g. cardme@999"
+                  placeholder="Username or email"
                   className="
                     h-12 w-full
                     rounded-xl
