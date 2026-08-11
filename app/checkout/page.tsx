@@ -28,7 +28,7 @@ export default function CheckoutPage() {
 
   const handleSubmitOrder = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.customerName || !formData.email || !formData.address) {
+    if (!formData.customerName || !formData.address) {
       alert("Please fill in all required shipping fields.");
       return;
     }
@@ -172,11 +172,10 @@ export default function CheckoutPage() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Email Address *</label>
+                <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Email Address</label>
                 <input
                   type="email"
                   name="email"
-                  required
                   placeholder="paul@diecast.com"
                   value={formData.email}
                   onChange={handleChange}
