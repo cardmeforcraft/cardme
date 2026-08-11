@@ -194,6 +194,27 @@ export default function Footer() {
               </a>
 
 
+              {/* Email */}
+              <a
+                href="mailto:cardmeforcraft123@gmail.com"
+                className="group flex items-center gap-3"
+              >
+                <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-[#C8102E]/10 transition-colors">
+                  <Mail className="w-4 h-4 text-[#C8102E]" />
+                </div>
+
+                <div>
+                  <p className="text-xs text-slate-500 uppercase tracking-wider">
+                    Email Us
+                  </p>
+
+                  <p className="text-sm text-slate-300 group-hover:text-white transition-colors">
+                    cardmeforcraft123@gmail.com
+                  </p>
+                </div>
+              </a>
+
+
               {/* Instagram */}
               <a
                 href="https://instagram.com/"
