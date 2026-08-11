@@ -175,14 +175,14 @@ export default function Navbar({ initialLinks }: NavbarProps) {
           >
             <Search className="w-5 h-5" />
           </button>
-          <Link
+          {/* <Link
             href="/admin"
             className="flex items-center gap-1.5 text-xs font-bold text-slate-700 hover:text-[#C8102E] bg-slate-100 hover:bg-red-50 px-2.5 sm:px-3 py-1.5 rounded-full border border-slate-200 transition-all"
             title="Admin Dashboard"
           >
             <ShieldCheck className="w-4 h-4 text-[#C8102E]" />
             <span className="hidden sm:inline">Admin</span>
-          </Link>
+          </Link> */}
           <button
             onClick={() => setIsCartOpen(true)}
             className="relative p-2.5 text-slate-700 hover:text-[#C8102E] bg-slate-100 hover:bg-red-50 rounded-full transition-colors"

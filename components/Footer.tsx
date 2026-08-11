@@ -1,5 +1,8 @@
+"use client";
 
-import React from "react";
+import React, { useState } from "react";
+import ShippingPolicyModal from "./ShippingPolicyModal";
+import ReturnPolicyModal from "./ReturnPolicyModal";
 import Link from "next/link";
 import {
   ShieldCheck,
@@ -13,6 +16,9 @@ import {
 } from "lucide-react";
 
 export default function Footer() {
+  const [isShippingOpen, setIsShippingOpen] = useState(false);
+  const [isReturnOpen, setIsReturnOpen] = useState(false);
+
   return (
     <footer className="bg-[#080808] text-white border-t border-white/5">
       <div className="max-w-7xl mx-auto px-5 sm:px-6 lg:px-8">
@@ -140,19 +146,19 @@ export default function Footer() {
               </Link>
               
             
-              <Link
-                href="#shipping"
-                className="text-sm text-slate-400 hover:text-[#C8102E] transition-colors"
+              <button
+                onClick={(e) => { e.preventDefault(); setIsShippingOpen(true); }}
+                className="text-sm text-slate-400 hover:text-[#C8102E] transition-colors text-left"
               >
                 Shipping Policy
-              </Link>
+              </button>
 
-              <Link
-                href="#returns"
-                className="text-sm text-slate-400 hover:text-[#C8102E] transition-colors"
+              <button
+                onClick={(e) => { e.preventDefault(); setIsReturnOpen(true); }}
+                className="text-sm text-slate-400 hover:text-[#C8102E] transition-colors text-left"
               >
                 Returns & Refunds
-              </Link>
+              </button>
 
             
             </div>
@@ -230,6 +236,15 @@ export default function Footer() {
         </div>
 
       </div>
+
+      <ShippingPolicyModal 
+        isOpen={isShippingOpen} 
+        onClose={() => setIsShippingOpen(false)} 
+      />
+      <ReturnPolicyModal 
+        isOpen={isReturnOpen} 
+        onClose={() => setIsReturnOpen(false)} 
+      />
     </footer>
   );
 }
