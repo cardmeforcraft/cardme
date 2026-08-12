@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useCart } from "@/context/CartContext";
 import { ShieldCheck, Truck, ArrowLeft, CheckCircle, CreditCard, Lock } from "lucide-react";
+import { getOptimizedImageUrl } from "@/lib/image";
 
 export default function CheckoutPage() {
   const { cart, subtotal, clearCart } = useCart();
@@ -94,7 +95,7 @@ export default function CheckoutPage() {
 
         <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 text-xs text-slate-600 text-left space-y-2">
           <p><strong className="text-slate-900">Name:</strong> {completedOrder.customerName}</p>
-          <p><strong className="text-slate-900">Email:</strong> {completedOrder.email}</p>
+          <p><strong className="text-slate-900">Email:</strong> {completedOrder.email || "Not provided"}</p>
           <p><strong className="text-slate-900">Shipping Address:</strong> {completedOrder.address}, {completedOrder.city} {completedOrder.zipCode}</p>
           <p><strong className="text-slate-900">Total Charged:</strong> <span className="text-[#0256B3] font-bold">₹{completedOrder.totalAmount?.toFixed(2) || subtotal.toFixed(2)}</span></p>
         </div>
@@ -270,7 +271,7 @@ export default function CheckoutPage() {
             {cart.map((item) => (
               <div key={item.id} className="flex items-center gap-3 text-xs">
                 <div className="relative w-12 h-12 bg-slate-100 rounded-lg overflow-hidden border border-slate-200 shrink-0">
-                  <Image src={item.image} alt={item.name} fill className="object-cover" unoptimized />
+                  <Image src={getOptimizedImageUrl(item.image, 120)} alt={item.name} fill className="object-cover" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <h4 className="font-extrabold text-slate-900 uppercase truncate">{item.name}</h4>

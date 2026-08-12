@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import Image from "next/image";
+import { getOptimizedImageUrl } from "@/lib/image";
 
 interface ProductGalleryProps {
   images: string[];
@@ -44,12 +45,11 @@ export default function ProductGallery({ images, name, badge }: ProductGalleryPr
               </div>
             )}
             <Image
-              src={img}
+              src={getOptimizedImageUrl(img, 300)}
               alt={`${name} view ${idx + 1}`}
               fill
               sizes="(max-width: 768px) 50vw, 25vw"
               className="object-cover group-hover:scale-105 transition-transform duration-300"
-              unoptimized
             />
           </div>
         ))}
@@ -58,11 +58,10 @@ export default function ProductGallery({ images, name, badge }: ProductGalleryPr
       {/* Main Full Preview Box if clicked */}
       <div className="relative aspect-[16/10] bg-slate-100 rounded-2xl overflow-hidden border border-slate-200 shadow-sm">
         <Image
-          src={activeImage}
+          src={getOptimizedImageUrl(activeImage, 800)}
           alt={name}
           fill
           className="object-cover"
-          unoptimized
         />
         <div className="absolute bottom-2 right-2 bg-slate-900/80 backdrop-blur text-white text-[10px] font-bold px-2.5 py-1 rounded-full">
           Click thumbnails above to switch angle

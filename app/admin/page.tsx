@@ -178,18 +178,35 @@ export default function AdminPage() {
       setUploading(true);
       setStatusMsg("");
       try {
+        // Retrieve the signature and configuration details from our backend
+        const signRes = await fetch("/api/upload/sign", {
+          method: "POST",
+        });
+        const signData = await signRes.json();
+        if (!signData.success) {
+          throw new Error(signData.message || "Failed to retrieve upload signature");
+        }
+
+        const { signature, timestamp, folder, apiKey, cloudName } = signData;
+
+        // Perform uploads directly to Cloudinary in parallel
         const uploadPromises = Array.from(files).map(async (file) => {
           const formDataObj = new FormData();
           formDataObj.append("file", file);
-          const res = await fetch("/api/upload", {
+          formDataObj.append("api_key", apiKey);
+          formDataObj.append("timestamp", String(timestamp));
+          formDataObj.append("signature", signature);
+          formDataObj.append("folder", folder);
+
+          const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
             method: "POST",
             body: formDataObj,
           });
           const data = await res.json();
-          if (data.success) {
-            return data.url as string;
+          if (res.ok) {
+            return data.secure_url as string;
           } else {
-            throw new Error(data.message || "Failed to upload file");
+            throw new Error(data.error?.message || "Failed to upload file to Cloudinary");
           }
         });
 

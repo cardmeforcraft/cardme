@@ -212,6 +212,7 @@ function GarageCatalogContent() {
                   color={product.color}
                   badge={product.badge}
                   priority={idx < 6}
+                  description={product.description}
                 />
               ))}
             </div>

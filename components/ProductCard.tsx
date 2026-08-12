@@ -7,6 +7,8 @@ import { ShoppingCart, Eye } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import { motion } from "framer-motion";
 
+import { getOptimizedImageUrl } from "@/lib/image";
+
 export interface ProductCardProps {
   id: string;
   name: string;
@@ -20,13 +22,15 @@ export interface ProductCardProps {
   color: string;
   badge?: string;
   priority?: boolean;
+  description?: string;
 }
 
 export default function ProductCard({
-  id, name, slug, brand, scale, series, price, originalPrice, images, color, badge, priority = false,
+  id, name, slug, brand, scale, series, price, originalPrice, images, color, badge, priority = false, description,
 }: ProductCardProps) {
   const { addToCart } = useCart();
-  const mainImage = images && images.length > 0 ? images[0] : "https://images.unsplash.com/photo-1617814076367-b759c7d7e738?auto=format&fit=crop&w=900&q=80";
+  const rawImage = images && images.length > 0 ? images[0] : "https://images.unsplash.com/photo-1617814076367-b759c7d7e738?auto=format&fit=crop&w=900&q=80";
+  const mainImage = getOptimizedImageUrl(rawImage, 400);
 
   const handleAddCart = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -77,6 +81,11 @@ export default function ProductCard({
             </h3>
           </Link>
           <p className="text-xs text-slate-500 font-medium mt-0.5">{series || brand}</p>
+          {description && (
+            <p className="text-xs text-slate-500 line-clamp-2 mt-2 leading-relaxed font-normal normal-case">
+              {description}
+            </p>
+          )}
         </div>
         <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
           <div>

@@ -51,7 +51,7 @@ function buildWhatsAppMessage(order: {
     `*CUSTOMER DETAILS*\n` +
     `*---------------------------------------------*\n` +
     `  Name : ${order.customerName}\n` +
-    `  Email: ${order.email}\n` +
+    `  Email: ${order.email || "Not provided"}\n` +
     `  Phone: ${order.phone || "Not provided"}\n\n` +
     `*SHIPPING ADDRESS*\n` +
     `*---------------------------------------------*\n` +
@@ -85,9 +85,9 @@ export async function POST(req: NextRequest) {
     await connectToDatabase();
     const body = await req.json();
 
-    if (!body.customerName || !body.email || !body.items || body.items.length === 0) {
+    if (!body.customerName || !body.items || body.items.length === 0) {
       return NextResponse.json(
-        { success: false, message: "Missing required order fields" },
+        { success: false, message: "Missing required order fields (Name and Items are required)" },
         { status: 400 }
       );
     }

@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { ArrowRight, ShoppingCart, Star, Zap, Trophy, ChevronRight } from "lucide-react";
 import { useCart } from "@/context/CartContext";
+import { getOptimizedImageUrl } from "@/lib/image";
 
 const FEATURED_DIVISIONS = [
   {
@@ -77,7 +78,6 @@ export default function HomePage() {
             fill
             className="object-cover object-center"
             priority
-            unoptimized
           />
           <div className="absolute inset-0 bg-gradient-to-r from-slate-950/85 via-slate-950/50 to-transparent" />
         </div>
@@ -147,7 +147,6 @@ export default function HomePage() {
                   alt={division.title}
                   fill
                   className="object-cover group-hover:scale-105 transition-transform duration-500"
-                  unoptimized
                 />
                 {/* Dark gradient overlay */}
                 <div className={`absolute inset-0 bg-gradient-to-t ${division.overlay}`} />
@@ -215,12 +214,11 @@ export default function HomePage() {
                         </div>
                       )}
                       <Image
-                        src={img}
+                        src={getOptimizedImageUrl(img, 400)}
                         alt={product.name}
                         fill
                         sizes="(max-width: 640px) 50vw, 25vw"
                         className="object-cover group-hover:scale-105 transition-transform duration-500"
-                        unoptimized
                       />
                     </Link>
 
@@ -231,6 +229,11 @@ export default function HomePage() {
                           {product.name}
                         </h3>
                       </Link>
+                      {product.description && (
+                        <p className="text-[11px] text-slate-500 line-clamp-2 mt-1.5 leading-relaxed font-normal normal-case">
+                          {product.description}
+                        </p>
+                      )}
                       <div className="mt-3 pt-2 border-t border-slate-100 flex items-center justify-between gap-1">
                         <div>
                           <span className="text-base sm:text-lg font-black text-[#1A1A2E]">₹{product.price?.toFixed(2)}</span>

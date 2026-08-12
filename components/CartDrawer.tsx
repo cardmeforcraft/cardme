@@ -6,6 +6,7 @@ import Link from "next/link";
 import { X, ShoppingBag, Trash2, Plus, Minus, ArrowRight } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import { motion, AnimatePresence } from "framer-motion";
+import { getOptimizedImageUrl } from "@/lib/image";
 
 export default function CartDrawer() {
   const { cart, isCartOpen, setIsCartOpen, removeFromCart, updateQuantity, subtotal, totalItems } = useCart();
@@ -79,11 +80,10 @@ export default function CartDrawer() {
                 >
                   <div className="relative w-14 h-14 sm:w-16 sm:h-16 bg-white rounded-lg border border-slate-200 overflow-hidden shrink-0">
                     <Image
-                      src={item.image}
+                      src={getOptimizedImageUrl(item.image, 150)}
                       alt={item.name}
                       fill
                       className="object-cover"
-                      unoptimized
                     />
                   </div>
 

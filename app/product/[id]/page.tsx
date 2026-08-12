@@ -223,17 +223,8 @@ export default function ProductDetailPage() {
             </ul>
           </div>
 
-          {/* Shipping & Authenticity guarantees */}
-          <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 flex items-center justify-between text-[11px] font-semibold text-slate-600">
-            <div className="flex items-center gap-1.5">
-              <Truck className="w-4 h-4 text-[#C8102E]" />
-              <span>Ships within 24 hours</span>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <ShieldCheck className="w-4 h-4 text-[#C8102E]" />
-              <span>Official License</span>
-            </div>
-          </div>
+          
+          
         </div>
       </div>
     </div>

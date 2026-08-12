@@ -60,8 +60,8 @@ export async function middleware(request: NextRequest) {
     } else if (pathname === "/api/seed") {
       // Re-seeding is admin only
       requiresAuth = true;
-    } else if (pathname === "/api/upload") {
-      // Image upload is admin only
+    } else if (pathname.startsWith("/api/upload")) {
+      // Image upload & signature generation is admin only
       requiresAuth = true;
     }
 
