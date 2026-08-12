@@ -32,7 +32,7 @@ function buildWhatsAppMessage(order: {
   address: string;
   city: string;
   zipCode: string;
-  items: { name: string; scale: string; price: number; quantity: number }[];
+  items: { name: string; scale: string; color?: string; price: number; quantity: number }[];
   totalAmount: number;
 }): string {
   const itemLines = order.items
@@ -40,6 +40,7 @@ function buildWhatsAppMessage(order: {
       (item, i) =>
         `  ${i + 1}. ${item.name}\n` +
         `     Scale: ${item.scale}\n` +
+        (item.color ? `     Color: ${item.color}\n` : '') +
         `     Qty: ${item.quantity}  ×  ₹${item.price.toFixed(2)} = ₹${(item.price * item.quantity).toFixed(2)}`
     )
     .join("\n\n");

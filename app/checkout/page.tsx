@@ -43,6 +43,7 @@ export default function CheckoutPage() {
           name: item.name,
           image: item.image,
           scale: item.scale,
+          color: item.color,
           price: item.price,
           quantity: item.quantity,
         })),
@@ -275,7 +276,7 @@ export default function CheckoutPage() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <h4 className="font-extrabold text-slate-900 uppercase truncate">{item.name}</h4>
-                  <p className="text-slate-500 text-[11px]">Qty: {item.quantity} • {item.scale}</p>
+                  <p className="text-slate-500 text-[11px]">Qty: {item.quantity} • {item.scale} • {item.color}</p>
                 </div>
                 <span className="font-extrabold text-slate-900">₹{(item.price * item.quantity).toFixed(2)}</span>
               </div>
