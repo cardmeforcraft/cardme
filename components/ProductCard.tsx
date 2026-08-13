@@ -23,19 +23,25 @@ export interface ProductCardProps {
   badge?: string;
   priority?: boolean;
   description?: string;
+  stockCount?: number;
+  inStock?: boolean;
 }
 
 export default function ProductCard({
-  id, name, slug, brand, scale, series, price, originalPrice, images, color, badge, priority = false, description,
+  id, name, slug, brand, scale, series, price, originalPrice, images, color, badge, priority = false, description, stockCount, inStock,
 }: ProductCardProps) {
   const { addToCart } = useCart();
   const rawImage = images && images.length > 0 ? images[0] : "https://images.unsplash.com/photo-1617814076367-b759c7d7e738?auto=format&fit=crop&w=900&q=80";
   const mainImage = getOptimizedImageUrl(rawImage, 400);
 
+  const maxStock = stockCount ?? 0;
+  const isOutOfStock = maxStock <= 0 || inStock === false;
+
   const handleAddCart = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    addToCart({ id: id || slug, name, price, image: mainImage, scale, color });
+    if (isOutOfStock) return;
+    addToCart({ id: id || slug, name, price, image: mainImage, scale, color, maxStock });
   };
 
   const getBadgeClass = (badgeText?: string) => {
@@ -94,9 +100,13 @@ export default function ProductCard({
               <span className="text-xs text-slate-400 line-through ml-1.5">₹{originalPrice.toFixed(2)}</span>
             )}
           </div>
-          <button onClick={handleAddCart} className="bg-[#C8102E] hover:bg-[#a00d24] active:scale-95 text-white text-xs font-extrabold px-3 py-2 rounded-lg flex items-center gap-1.5 shadow-sm transition-all">
-            <span>ADD</span>
-            <ShoppingCart className="w-3.5 h-3.5" />
+          <button 
+            onClick={handleAddCart} 
+            disabled={isOutOfStock}
+            className={`${isOutOfStock ? 'bg-slate-300 text-slate-500 cursor-not-allowed' : 'bg-[#C8102E] hover:bg-[#a00d24] active:scale-95 text-white'} text-xs font-extrabold px-3 py-2 rounded-lg flex items-center gap-1.5 shadow-sm transition-all`}
+          >
+            <span>{isOutOfStock ? 'OUT OF STOCK' : 'ADD'}</span>
+            {!isOutOfStock && <ShoppingCart className="w-3.5 h-3.5" />}
           </button>
         </div>
       </div>

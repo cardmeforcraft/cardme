@@ -54,6 +54,14 @@ export default function HomePage() {
   }, []);
 
   const handleQuickAdd = (product: any) => {
+    const maxStock = product.stockCount ?? 0;
+    const isOutOfStock = maxStock <= 0 || product.inStock === false;
+
+    if (isOutOfStock) {
+      alert("This item is currently out of stock.");
+      return;
+    }
+
     addToCart({
       id: product._id || product.slug,
       name: product.name,
@@ -61,6 +69,7 @@ export default function HomePage() {
       image: product.images?.[0] || "",
       scale: product.scale,
       color: product.color,
+      maxStock: maxStock,
     });
   };
 
@@ -243,8 +252,9 @@ export default function HomePage() {
                         </div>
                         <button
                           onClick={() => handleQuickAdd(product)}
-                          className="bg-[#0256B3] hover:bg-blue-700 active:scale-95 text-white p-2 rounded-lg shadow-sm transition-all"
-                          title="Add to Cart"
+                          disabled={(product.stockCount ?? 0) <= 0 || product.inStock === false}
+                          className={`p-2 rounded-lg shadow-sm transition-all ${(product.stockCount ?? 0) <= 0 || product.inStock === false ? 'bg-slate-300 cursor-not-allowed text-slate-500' : 'bg-[#0256B3] hover:bg-blue-700 active:scale-95 text-white'}`}
+                          title={(product.stockCount ?? 0) <= 0 || product.inStock === false ? "Out of Stock" : "Add to Cart"}
                         >
                           <ShoppingCart className="w-3.5 h-3.5" />
                         </button>

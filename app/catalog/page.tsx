@@ -213,6 +213,8 @@ function GarageCatalogContent() {
                   badge={product.badge}
                   priority={idx < 6}
                   description={product.description}
+                  stockCount={product.stockCount}
+                  inStock={product.inStock}
                 />
               ))}
             </div>
