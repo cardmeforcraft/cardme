@@ -9,6 +9,7 @@ import { getOptimizedImageUrl } from "@/lib/image";
 
 export default function CheckoutPage() {
   const { cart, subtotal, clearCart } = useCart();
+  const hasInvalidStock = cart.some((item) => item.maxStock !== undefined && item.quantity > item.maxStock);
 
   const [formData, setFormData] = useState({
     customerName: "",
@@ -255,10 +256,10 @@ export default function CheckoutPage() {
 
           <button
             type="submit"
-            disabled={isSubmitting}
+            disabled={isSubmitting || hasInvalidStock}
             className="w-full bg-[#0256B3] hover:bg-blue-700 disabled:opacity-50 text-white font-black text-xs py-4 px-6 rounded-xl shadow-lg uppercase tracking-wider transition-all"
           >
-            {isSubmitting ? "Placing Order..." : `Complete Order (₹${subtotal.toFixed(2)})`}
+            {hasInvalidStock ? "Remove Out of Stock Items" : isSubmitting ? "Placing Order..." : `Complete Order (₹${subtotal.toFixed(2)})`}
           </button>
         </form>
 
@@ -277,6 +278,11 @@ export default function CheckoutPage() {
                 <div className="flex-1 min-w-0">
                   <h4 className="font-extrabold text-slate-900 uppercase truncate">{item.name}</h4>
                   <p className="text-slate-500 text-[11px]">Qty: {item.quantity} • {item.scale} • {item.color}</p>
+                  {item.maxStock !== undefined && item.quantity > item.maxStock && (
+                    <p className="text-red-500 text-[10px] font-bold uppercase mt-0.5">
+                      {item.maxStock <= 0 ? "Out of Stock" : `Only ${item.maxStock} left in stock`}
+                    </p>
+                  )}
                 </div>
                 <span className="font-extrabold text-slate-900">₹{(item.price * item.quantity).toFixed(2)}</span>
               </div>

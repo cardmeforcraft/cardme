@@ -11,6 +11,8 @@ import { getOptimizedImageUrl } from "@/lib/image";
 export default function CartDrawer() {
   const { cart, isCartOpen, setIsCartOpen, removeFromCart, updateQuantity, subtotal, totalItems } = useCart();
 
+  const hasInvalidStock = cart.some((item) => item.maxStock !== undefined && item.quantity > item.maxStock);
+
   return (
     <AnimatePresence>
       {isCartOpen && (
@@ -94,9 +96,16 @@ export default function CartDrawer() {
                     <p className="text-[11px] font-semibold text-slate-500">
                       Scale: {item.scale} • {item.color}
                     </p>
-                    <p className="text-sm font-black text-[#C8102E] mt-1">
-                      ₹{item.price.toFixed(2)}
-                    </p>
+                    <div className="flex items-center gap-2 mt-1">
+                      <p className="text-sm font-black text-[#C8102E]">
+                        ₹{item.price.toFixed(2)}
+                      </p>
+                      {item.maxStock !== undefined && item.quantity > item.maxStock && (
+                        <span className="text-[10px] font-bold text-red-500 uppercase">
+                          {item.maxStock <= 0 ? "Out of Stock" : `Only ${item.maxStock} left`}
+                        </span>
+                      )}
+                    </div>
                   </div>
 
                   {/* Quantity Controls */}
@@ -151,14 +160,23 @@ export default function CartDrawer() {
                 </div>
               </div>
 
-              <Link
-                href="/checkout"
-                onClick={() => setIsCartOpen(false)}
-                className="w-full bg-[#C8102E] hover:bg-red-700 active:scale-[0.99] text-white text-xs font-extrabold py-3.5 px-4 rounded-xl flex items-center justify-center gap-2 shadow-lg transition-all uppercase tracking-wider"
-              >
-                <span>Proceed to Checkout</span>
-                <ArrowRight className="w-4 h-4" />
-              </Link>
+              {hasInvalidStock ? (
+                <button
+                  disabled
+                  className="w-full bg-slate-300 text-slate-500 text-xs font-extrabold py-3.5 px-4 rounded-xl flex items-center justify-center gap-2 shadow-lg uppercase tracking-wider cursor-not-allowed"
+                >
+                  <span>Resolve Stock Issues</span>
+                </button>
+              ) : (
+                <Link
+                  href="/checkout"
+                  onClick={() => setIsCartOpen(false)}
+                  className="w-full bg-[#C8102E] hover:bg-red-700 active:scale-[0.99] text-white text-xs font-extrabold py-3.5 px-4 rounded-xl flex items-center justify-center gap-2 shadow-lg transition-all uppercase tracking-wider"
+                >
+                  <span>Proceed to Checkout</span>
+                  <ArrowRight className="w-4 h-4" />
+                </Link>
+              )}
             </div>
           )}
         </motion.div>
