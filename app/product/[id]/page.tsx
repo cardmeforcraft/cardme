@@ -66,7 +66,11 @@ export default function ProductDetailPage() {
     );
   }
 
+  const maxStock = product.stockCount ?? 0;
+  const isOutOfStock = maxStock <= 0 || product.inStock === false;
+
   const handleAddToCart = () => {
+    if (isOutOfStock) return;
     addToCart(
       {
         id: product._id || product.slug,
@@ -75,12 +79,14 @@ export default function ProductDetailPage() {
         image: product.images?.[0] || "",
         scale: product.scale,
         color: selectedVariant || product.color,
+        maxStock: maxStock, // Pass maxStock to cart if needed
       },
-      quantity
+      Math.min(quantity, maxStock)
     );
   };
 
   const handleBuyNow = () => {
+    if (isOutOfStock) return;
     handleAddToCart();
     setIsCartOpen(false);
     router.push("/checkout");
@@ -147,43 +153,55 @@ export default function ProductDetailPage() {
           </div>
 
           {/* Quantity Selector & Add To Cart Bar */}
-          <div className="space-y-3 pt-2">
-            <div className="flex items-center gap-3">
-              {/* Quantity Counter */}
-              <div className="flex items-center border-2 border-slate-200 rounded-full px-3 py-1.5 bg-slate-50">
+          {isOutOfStock ? (
+            <div className="pt-2">
+              <div className="w-full bg-slate-200 text-slate-500 font-black text-sm py-3.5 px-6 rounded-full text-center uppercase tracking-wider">
+                Out of Stock
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-3 pt-2">
+              <div className="text-xs font-semibold text-slate-500">
+                {maxStock} item{maxStock !== 1 ? 's' : ''} in stock
+              </div>
+              <div className="flex items-center gap-3">
+                {/* Quantity Counter */}
+                <div className="flex items-center border-2 border-slate-200 rounded-full px-3 py-1.5 bg-slate-50">
+                  <button
+                    onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+                    className="text-slate-600 hover:text-slate-900 font-extrabold px-2 py-1"
+                  >
+                    <Minus className="w-3.5 h-3.5" />
+                  </button>
+                  <span className="text-sm font-black text-slate-900 px-3">{quantity}</span>
+                  <button
+                    onClick={() => setQuantity((q) => (q < maxStock ? q + 1 : q))}
+                    disabled={quantity >= maxStock}
+                    className="text-slate-600 hover:text-slate-900 font-extrabold px-2 py-1 disabled:opacity-30 disabled:cursor-not-allowed"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+
+                {/* Add To Cart Outlined Pill Button */}
                 <button
-                  onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                  className="text-slate-600 hover:text-slate-900 font-extrabold px-2 py-1"
+                  onClick={handleAddToCart}
+                  className="flex-1 bg-white hover:bg-slate-50 text-slate-900 border-2 border-slate-300 hover:border-slate-400 font-black text-xs py-3 px-4 rounded-full flex items-center justify-center gap-2 shadow-sm transition-all"
                 >
-                  <Minus className="w-3.5 h-3.5" />
-                </button>
-                <span className="text-sm font-black text-slate-900 px-3">{quantity}</span>
-                <button
-                  onClick={() => setQuantity((q) => q + 1)}
-                  className="text-slate-600 hover:text-slate-900 font-extrabold px-2 py-1"
-                >
-                  <Plus className="w-3.5 h-3.5" />
+                  <ShoppingCart className="w-4 h-4 text-[#C8102E]" />
+                  <span>Add to cart</span>
                 </button>
               </div>
 
-              {/* Add To Cart Outlined Pill Button */}
+              {/* Buy It Now Prominent Button */}
               <button
-                onClick={handleAddToCart}
-                className="flex-1 bg-white hover:bg-slate-50 text-slate-900 border-2 border-slate-300 hover:border-slate-400 font-black text-xs py-3 px-4 rounded-full flex items-center justify-center gap-2 shadow-sm transition-all"
+                onClick={handleBuyNow}
+                className="w-full bg-[#C8102E] hover:bg-red-700 text-white font-black text-sm py-3.5 px-6 rounded-full shadow-lg hover:shadow-xl transition-all uppercase tracking-wider text-center"
               >
-                <ShoppingCart className="w-4 h-4 text-[#C8102E]" />
-                <span>Add to cart</span>
+                Buy it now
               </button>
             </div>
-
-            {/* Buy It Now Prominent Button */}
-            <button
-              onClick={handleBuyNow}
-              className="w-full bg-[#C8102E] hover:bg-red-700 text-white font-black text-sm py-3.5 px-6 rounded-full shadow-lg hover:shadow-xl transition-all uppercase tracking-wider text-center"
-            >
-              Buy it now
-            </button>
-          </div>
+          )}
 
           <hr className="border-slate-100" />
 

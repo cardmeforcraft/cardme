@@ -43,7 +43,7 @@ export async function POST(req: NextRequest) {
     await connectToDatabase();
     const { sessionId, isNew } = getOrCreateSessionId(req);
     const body = await req.json();
-    const { productId, name, price, image, scale, color, quantity = 1 } = body;
+    const { productId, name, price, image, scale, color, quantity = 1, maxStock } = body;
 
     if (!productId || !name || price === undefined) {
       return NextResponse.json({ success: false, message: "Missing item details" }, { status: 400 });
@@ -69,6 +69,7 @@ export async function POST(req: NextRequest) {
         scale,
         color,
         quantity,
+        maxStock,
       });
     }
 

@@ -10,6 +10,7 @@ export interface CartItem {
   scale: string;
   color: string;
   quantity: number;
+  maxStock?: number;
 }
 
 interface CartContextType {
@@ -46,6 +47,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
             scale: item.scale,
             color: item.color,
             quantity: item.quantity,
+            maxStock: item.maxStock,
           }));
           setCart(mapped);
         }
@@ -85,6 +87,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
           scale: item.scale,
           color: item.color,
           quantity,
+          maxStock: (item as any).maxStock,
         }),
       });
     } catch (e) {

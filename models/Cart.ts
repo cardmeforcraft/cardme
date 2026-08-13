@@ -8,6 +8,7 @@ export interface ICartItem {
   scale: string;
   color: string;
   quantity: number;
+  maxStock?: number;
 }
 
 export interface ICart extends Document {
@@ -25,6 +26,7 @@ const CartItemSchema = new Schema<ICartItem>({
   scale: { type: String, required: true },
   color: { type: String, required: true },
   quantity: { type: Number, required: true, min: 1 },
+  maxStock: { type: Number },
 });
 
 const CartSchema = new Schema<ICart>(
