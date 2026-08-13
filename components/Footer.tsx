@@ -20,7 +20,7 @@ export default function Footer() {
   const [isReturnOpen, setIsReturnOpen] = useState(false);
 
   return (
-    <footer className="bg-[#080808] text-white border-t border-white/5">
+    <footer id="footer" className="bg-[#080808] text-white border-t border-white/5">
       <div className="max-w-7xl mx-auto px-5 sm:px-6 lg:px-8">
 
         
@@ -164,7 +164,7 @@ export default function Footer() {
 
 
           {/* CONTACT */}
-          <div>
+          <div id="contact">
             <h3 className="text-xs font-black uppercase tracking-[0.2em] text-white mb-5">
               Get In Touch
             </h3>
