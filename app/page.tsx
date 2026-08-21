@@ -9,24 +9,24 @@ import { getOptimizedImageUrl } from "@/lib/image";
 
 const FEATURED_DIVISIONS = [
   {
-    title: "MUSCLE",
-    subtitle: "Raw American Power",
-    image: "/images/division-muscle.png",
-    href: "/catalog?series=Muscle",
+    title: "DIE CAST CARS , RC CARS",
+    subtitle: "Choose your discipline. Build your fleet.",
+    image: "/images/division-Diecast cars.png",
+    href: "/catalog?series=Die+cast+cars&series=rc+car",
     overlay: "from-slate-900/80 via-slate-900/40 to-transparent",
   },
   {
-    title: "SUPERCARS",
+    title: "DIE CAST CARS FRAME",
     subtitle: "Precision Engineering",
-    image: "/images/division-supercars.png",
-    href: "/catalog?series=Street+%2F+Track",
+    image: "/images/image copy.png",
+    href: "/catalog?series=Car+Frame",
     overlay: "from-slate-900/80 via-slate-900/40 to-transparent",
   },
   {
-    title: "TRACK SETS",
+    title: "Soft toys",
     subtitle: "Build & Race",
-    image: "/images/division-tracksets.png",
-    href: "/catalog?series=Baja+Racers",
+    image: "/images/image copy 2.png",
+    href: "/catalog?series=Soft+toys",
     overlay: "from-slate-900/80 via-slate-900/40 to-transparent",
   },
 ];
@@ -127,7 +127,7 @@ export default function HomePage() {
 
       {/* ═══════════════════════════════════════════════════
           FEATURED DIVISIONS SECTION
-          ═══════════════════════════════════════════════════ */}
+          ═══════════════════════════════════════════════════ */}1
       <section className="bg-slate-50 py-14 sm:py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Section Header */}

@@ -28,7 +28,7 @@ function GarageCatalogContent() {
 
   const [filters, setFilters] = useState<FilterState>({
     scale: searchParams.get("scale") || "",
-    series: searchParams.get("series") || "",
+    series: searchParams.getAll("series").join(", ") || "",
     color: searchParams.get("color") || "",
     maxPrice: 150,
   });
@@ -49,12 +49,12 @@ function GarageCatalogContent() {
   // Sync URL params → state on navigation
   useEffect(() => {
     const scaleParam = searchParams.get("scale");
-    const seriesParam = searchParams.get("series");
+    const seriesParam = searchParams.getAll("series");
     const searchParam = searchParams.get("search");
     setFilters((prev) => ({
       ...prev,
       scale: scaleParam ?? prev.scale,
-      series: seriesParam ?? prev.series,
+      series: seriesParam.length > 0 ? seriesParam.join(", ") : prev.series,
     }));
     if (searchParam !== null) {
       setSearchQuery(searchParam);
@@ -165,7 +165,15 @@ function GarageCatalogContent() {
             <div className="flex items-center gap-2 flex-wrap">
               <span className="text-xs font-extrabold uppercase text-slate-500 mr-1">Active:</span>
               {filters.scale && <span className="bg-[#0256B3] text-white text-xs font-bold px-2.5 py-1 rounded-full flex items-center gap-1 shadow-sm">{filters.scale}<button onClick={() => handleFilterChange({ scale: "" })} className="hover:text-amber-300 ml-1">×</button></span>}
-              {filters.series && <span className="bg-blue-600 text-white text-xs font-bold px-2.5 py-1 rounded-full flex items-center gap-1 shadow-sm">Series: {filters.series}<button onClick={() => handleFilterChange({ series: "" })} className="hover:text-amber-300 ml-1">×</button></span>}
+              {filters.series && filters.series.split(",").map(s => s.trim()).filter(Boolean).map(s => (
+                <span key={`series-${s}`} className="bg-blue-600 text-white text-xs font-bold px-2.5 py-1 rounded-full flex items-center gap-1 shadow-sm">
+                  Series: {s}
+                  <button onClick={() => {
+                    const newSeries = filters.series.split(",").map(x => x.trim()).filter(x => x && x !== s).join(", ");
+                    handleFilterChange({ series: newSeries });
+                  }} className="hover:text-amber-300 ml-1">×</button>
+                </span>
+              ))}
               {filters.color && <span className="bg-slate-800 text-white text-xs font-bold px-2.5 py-1 rounded-full flex items-center gap-1 shadow-sm">Color: {filters.color}<button onClick={() => handleFilterChange({ color: "" })} className="hover:text-amber-300 ml-1">×</button></span>}
               {debouncedSearch && <span className="bg-amber-600 text-white text-xs font-bold px-2.5 py-1 rounded-full flex items-center gap-1 shadow-sm">Search: &quot;{debouncedSearch}&quot;<button onClick={() => { setSearchQuery(""); setDebouncedSearch(""); }} className="hover:text-amber-300 ml-1">×</button></span>}
               {!filters.scale && !filters.series && !filters.color && !debouncedSearch && <span className="text-xs text-slate-400 font-medium">All Models</span>}

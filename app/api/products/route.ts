@@ -24,7 +24,14 @@ export async function GET(req: NextRequest) {
       ];
     }
     if (scale) query.scale = { $regex: scale, $options: "i" };
-    if (series) query.series = { $regex: series, $options: "i" };
+    if (series) {
+      if (series.includes(",")) {
+        const seriesList = series.split(",").map(s => s.trim());
+        query.series = { $in: seriesList.map(s => new RegExp(s, "i")) };
+      } else {
+        query.series = { $regex: series, $options: "i" };
+      }
+    }
     if (color) query.color = { $regex: color, $options: "i" };
     if (maxPrice) query.price = { $lte: parseFloat(maxPrice) };
 
