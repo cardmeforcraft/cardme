@@ -23,10 +23,10 @@ const FEATURED_DIVISIONS = [
     overlay: "from-slate-900/80 via-slate-900/40 to-transparent",
   },
   {
-    title: "Soft toys",
-    subtitle: "Build & Race",
-    image: "/images/image copy 2.png",
-    href: "/catalog?series=Soft+toys",
+    title: "Soft dolls , pinterest items",
+    subtitle: "So many items",
+    image: "/images/softdolls.png",
+    href: "/catalog?series=Soft+dolls&series=Pinterest+items",
     overlay: "from-slate-900/80 via-slate-900/40 to-transparent",
   },
 ];
