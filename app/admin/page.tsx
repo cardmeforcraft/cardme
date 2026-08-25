@@ -421,8 +421,8 @@ export default function AdminPage() {
               setFormData({
                 name: "",
                 brand: "Diecast Elite",
-                scale: "1:64 (Standard)",
-                series: "Street / Track",
+                scale: "",
+                series: "",
                 price: "",
                 originalPrice: "",
                 color: "Silver",
