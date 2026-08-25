@@ -82,7 +82,7 @@ export default function ProductCard({
       <div className="p-4 flex flex-col flex-1 justify-between">
         <div>
           <Link href={`/product/${slug}`} className="block">
-            <h3 className="font-extrabold text-sm text-[#1A1A2E] group-hover:text-[#C8102E] transition-colors line-clamp-2 uppercase tracking-tight">
+            <h3 className="font-extrabold text-sm text-[#1A1A2E] group-hover:text-[#C8102E] transition-colors line-clamp-2 tracking-tight">
               {name}
             </h3>
           </Link>

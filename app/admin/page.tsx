@@ -23,8 +23,8 @@ export default function AdminPage() {
   const [formData, setFormData] = useState({
     name: "",
     brand: "Diecast Elite",
-    scale: "1:64 (Standard)",
-    series: "Street / Track",
+    scale: "",
+    series: "",
     price: "",
     originalPrice: "",
     color: "Silver",
@@ -241,8 +241,8 @@ export default function AdminPage() {
 
   const handleSubmitForm = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.name || !formData.price) {
-      alert("Name and Price are required.");
+    if (!formData.name || !formData.price || !formData.scale || !formData.series) {
+      alert("Name, Price, Scale, and Series are required.");
       return;
     }
     try {
@@ -270,8 +270,8 @@ export default function AdminPage() {
         setFormData({
           name: "",
           brand: "Diecast Elite",
-          scale: "1:64 (Standard)",
-          series: "Street / Track",
+          scale: "",
+          series: "",
           price: "",
           originalPrice: "",
           color: "Silver",
@@ -638,10 +638,12 @@ export default function AdminPage() {
             <div>
               <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Scale Category *</label>
               <select
+                required
                 value={formData.scale}
                 onChange={(e) => setFormData({ ...formData, scale: e.target.value })}
                 className="w-full px-3.5 py-2 text-xs bg-slate-50 border border-slate-200 rounded-lg"
               >
+                <option value="" disabled>Select Scale</option>
                 {scales.map((s) => (
                   <option key={s} value={s}>{s}</option>
                 ))}
@@ -649,12 +651,14 @@ export default function AdminPage() {
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Series / Collection</label>
+              <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Series / Collection *</label>
               <select
+                required
                 value={formData.series}
                 onChange={(e) => setFormData({ ...formData, series: e.target.value })}
                 className="w-full px-3.5 py-2 text-xs bg-slate-50 border border-slate-200 rounded-lg"
               >
+                <option value="" disabled>Select Series</option>
                 {categories.map((c) => (
                   <option key={c} value={c}>{c}</option>
                 ))}

@@ -30,7 +30,7 @@ function GarageCatalogContent() {
     scale: searchParams.get("scale") || "",
     series: searchParams.getAll("series").join(", ") || "",
     color: searchParams.get("color") || "",
-    maxPrice: 150,
+    maxPrice: 1000,
   });
 
   const [searchQuery, setSearchQuery] = useState(searchParams.get("search") || "");
@@ -85,7 +85,7 @@ function GarageCatalogContent() {
       if (filters.scale) params.set("scale", filters.scale);
       if (filters.series) params.set("series", filters.series);
       if (filters.color) params.set("color", filters.color);
-      if (filters.maxPrice < 150) params.set("maxPrice", filters.maxPrice.toString());
+      if (filters.maxPrice < 1000) params.set("maxPrice", filters.maxPrice.toString());
       if (sortBy) params.set("sort", sortBy);
       params.set("page", String(page));
       params.set("limit", "24");
@@ -118,7 +118,7 @@ function GarageCatalogContent() {
   };
 
   const handleClearFilters = () => {
-    setFilters({ scale: "", series: "", color: "", maxPrice: 150 });
+    setFilters({ scale: "", series: "", color: "", maxPrice: 1000 });
     setSearchQuery("");
     setDebouncedSearch("");
     setCurrentPage(1);
