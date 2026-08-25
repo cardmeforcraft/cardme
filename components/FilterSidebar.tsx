@@ -141,15 +141,15 @@ export default function FilterSidebar({
         <input
           type="range"
           min={0}
-          max={150}
-          step={5}
+          max={1000}
+          step={50}
           value={filters.maxPrice}
           onChange={(e) => onFilterChange({ maxPrice: Number(e.target.value) })}
           className="w-full"
         />
         <div className="flex items-center justify-between text-[10px] font-bold text-slate-400 mt-1">
           <span>₹0</span>
-          <span>₹150+</span>
+          <span>₹1000+</span>
         </div>
       </div>
 
