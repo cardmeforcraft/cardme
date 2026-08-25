@@ -23,13 +23,17 @@ export async function GET(req: NextRequest) {
         { description: { $regex: search, $options: "i" } },
       ];
     }
-    if (scale) query.scale = { $regex: scale, $options: "i" };
+    function escapeRegExp(string: string) {
+      return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    }
+
+    if (scale) query.scale = { $regex: escapeRegExp(scale), $options: "i" };
     if (series) {
       if (series.includes(",")) {
-        const seriesList = series.split(",").map(s => s.trim());
+        const seriesList = series.split(",").map(s => escapeRegExp(s.trim()));
         query.series = { $in: seriesList.map(s => new RegExp(s, "i")) };
       } else {
-        query.series = { $regex: series, $options: "i" };
+        query.series = { $regex: escapeRegExp(series), $options: "i" };
       }
     }
     if (color) query.color = { $regex: color, $options: "i" };
