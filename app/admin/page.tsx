@@ -167,7 +167,7 @@ export default function AdminPage() {
       images: product.images || (product.images?.[0] ? [product.images[0]] : []),
       description: product.description || "",
       features: Array.isArray(product.features) ? product.features.join(", ") : "",
-      stockCount: product.stockCount ? String(product.stockCount) : "25",
+      stockCount: product.stockCount !== undefined && product.stockCount !== null ? String(product.stockCount) : "25",
     });
     setActiveTab("add");
   };
@@ -700,6 +700,7 @@ export default function AdminPage() {
                 <option value="NEW ARRIVAL">NEW ARRIVAL</option>
                 <option value="DISCOUNT SALE">DISCOUNT SALE</option>
                 <option value="INSTOCK NOW">INSTOCK NOW</option>
+                <option value="STOCKOUT">STOCKOUT</option>
               </select>
             </div>
 
@@ -831,7 +832,14 @@ export default function AdminPage() {
                 required
                 placeholder="25"
                 value={formData.stockCount}
-                onChange={(e) => setFormData({ ...formData, stockCount: e.target.value })}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  setFormData({ 
+                    ...formData, 
+                    stockCount: val,
+                    badge: parseInt(val || "25") === 0 ? "STOCKOUT" : formData.badge
+                  });
+                }}
                 className="w-full px-3.5 py-2 text-sm bg-slate-50 border border-slate-200 rounded-lg"
               />
             </div>
