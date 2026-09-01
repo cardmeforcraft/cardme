@@ -513,7 +513,7 @@ export default function AdminPage() {
                       <td className="p-3.5 font-semibold text-red-700">{prod.scale}</td>
                       <td className="p-3.5">{prod.series || prod.brand}</td>
                       <td className="p-3.5 font-extrabold text-slate-900">₹{prod.price?.toFixed(2)}</td>
-                      <td className="p-3.5 font-bold text-emerald-600">{prod.stockCount || 25} in stock</td>
+                      <td className="p-3.5 font-bold text-emerald-600">{prod.stockCount ?? 25} in stock</td>
                       <td className="p-3.5 text-right">
                         <div className="flex items-center justify-end gap-2">
                           <button
