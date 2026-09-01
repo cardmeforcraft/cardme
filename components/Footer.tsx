@@ -173,7 +173,7 @@ export default function Footer() {
 
               {/* Phone */}
               <a
-                href="tel:73069422291"
+                href="tel:7306942291"
                 className="group flex items-center gap-3"
               >
                 <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-[#C8102E]/10 transition-colors">
@@ -186,7 +186,7 @@ export default function Footer() {
                   </p>
 
                   <p className="text-sm text-slate-300 group-hover:text-white transition-colors">
-                    73069422291
+                   +91 73069 42291
                   </p>
                 </div>
               </a>
