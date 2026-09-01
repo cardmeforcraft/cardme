@@ -19,7 +19,7 @@ const FEATURED_DIVISIONS = [
     title: "DIE CAST CARS FRAME",
     subtitle: "Precision Engineering",
     image: "/images/image copy.png",
-    href: "/catalog?series=Car+Frame",
+    href: "/catalog?series=Die+Cast+Cars+Frame",
     overlay: "from-slate-900/80 via-slate-900/40 to-transparent",
   },
   {
