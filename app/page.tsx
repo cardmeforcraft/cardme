@@ -9,10 +9,10 @@ import { getOptimizedImageUrl } from "@/lib/image";
 
 const FEATURED_DIVISIONS = [
   {
-    title: "DIE CAST CARS , RC CARS",
+    title: "METAL CARS , RC CARS",
     subtitle: "Choose your discipline. Build your fleet.",
     image: "/images/division-Diecast cars.png",
-    href: "/catalog?series=Die+cast+cars&series=rc+car",
+    href: "/catalog?series=Metal+cars&series=rc+cars",
     overlay: "from-slate-900/80 via-slate-900/40 to-transparent",
   },
   {
