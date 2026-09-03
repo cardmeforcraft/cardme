@@ -80,7 +80,8 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const slug = body.slug || body.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+    const baseSlug = body.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+    const slug = body.slug || `${baseSlug}-${Date.now().toString(36)}`;
 
     const newProduct = new Product({
       name: body.name,

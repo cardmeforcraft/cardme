@@ -283,10 +283,12 @@ export default function AdminPage() {
         });
         setActiveTab("products");
         fetchData();
+      } else {
+        alert("Failed to save product: " + (data.message || "Unknown error"));
       }
-    } catch (e) {
+    } catch (e: any) {
       console.error(e);
-      alert("Failed to save product");
+      alert("Failed to save product: " + (e.message || "Unknown error"));
     }
   };
 
