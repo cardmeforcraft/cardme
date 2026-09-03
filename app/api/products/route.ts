@@ -13,7 +13,9 @@ export async function GET(req: NextRequest) {
     const maxPrice = searchParams.get("maxPrice");
     const sort = searchParams.get("sort") || "featured";
     const page = Math.max(1, parseInt(searchParams.get("page") || "1", 10));
-    const limit = Math.min(48, Math.max(1, parseInt(searchParams.get("limit") || "24", 10)));
+    const isAdminReq = searchParams.get("admin") === "true";
+    const maxLimit = isAdminReq ? 1000 : 48;
+    const limit = Math.min(maxLimit, Math.max(1, parseInt(searchParams.get("limit") || "24", 10)));
 
     const query: any = { isAdminAdded: true };
     if (search) {

@@ -53,7 +53,7 @@ export default function AdminPage() {
     setLoading(true);
     try {
       const [prodRes, orderRes, cfgRes] = await Promise.all([
-        fetch(`/api/products?_t=${Date.now()}`, { cache: "no-store" }),
+        fetch(`/api/products?admin=true&limit=1000&_t=${Date.now()}`, { cache: "no-store" }),
         fetch(`/api/orders?_t=${Date.now()}`, { cache: "no-store" }),
         fetch(`/api/config?_t=${Date.now()}`, { cache: "no-store" }),
       ]);
