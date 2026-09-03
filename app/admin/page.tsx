@@ -201,7 +201,7 @@ export default function AdminPage() {
         `"${p.badge || ""}"`
       ]);
       
-      const csvContent = [headers.join(","), ...rows.map(r => r.join(","))].join("\n");
+      const csvContent = [headers.join(","), ...rows.map((r: any[]) => r.join(","))].join("\n");
       const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
       const link = document.createElement("a");
       link.href = URL.createObjectURL(blob);
