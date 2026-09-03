@@ -12,6 +12,8 @@ export default function AdminPage() {
   const [products, setProducts] = useState<any[]>([]);
   const [orders, setOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   const [activeTab, setActiveTab] = useState<"products" | "orders" | "add" | "config">("products");
   const [searchTerm, setSearchTerm] = useState("");
   const [statusMsg, setStatusMsg] = useState("");
@@ -49,11 +51,11 @@ export default function AdminPage() {
   const [whatsappSaving, setWhatsappSaving] = useState(false);
   const [whatsappError, setWhatsappError] = useState("");
 
-  const fetchData = async () => {
+  const fetchData = async (page = currentPage) => {
     setLoading(true);
     try {
       const [prodRes, orderRes, cfgRes] = await Promise.all([
-        fetch(`/api/products?admin=true&limit=1000&_t=${Date.now()}`, { cache: "no-store" }),
+        fetch(`/api/products?admin=true&limit=40&page=${page}&_t=${Date.now()}`, { cache: "no-store" }),
         fetch(`/api/orders?_t=${Date.now()}`, { cache: "no-store" }),
         fetch(`/api/config?_t=${Date.now()}`, { cache: "no-store" }),
       ]);
@@ -61,7 +63,11 @@ export default function AdminPage() {
       const orderData = await orderRes.json();
       const cfgData = await cfgRes.json();
 
-      if (prodData.success) setProducts(prodData.products || []);
+      if (prodData.success) {
+        setProducts(prodData.products || []);
+        setTotalPages(prodData.totalPages || 1);
+        setCurrentPage(prodData.page || 1);
+      }
       if (orderData.success) setOrders(orderData.orders || []);
       if (cfgData.success) {
         setScales(cfgData.scales || []);
@@ -538,6 +544,27 @@ export default function AdminPage() {
                   ))}
                 </tbody>
               </table>
+            </div>
+          )}
+          {totalPages > 1 && !loading && (
+            <div className="p-4 border-t border-slate-100 flex items-center justify-between bg-slate-50 rounded-b-2xl">
+              <button
+                onClick={() => { const p = Math.max(1, currentPage - 1); setCurrentPage(p); fetchData(p); }}
+                disabled={currentPage === 1}
+                className="px-4 py-2 text-xs font-bold bg-white border border-slate-200 rounded-lg text-slate-600 hover:bg-slate-100 disabled:opacity-50 transition-colors shadow-sm"
+              >
+                Previous
+              </button>
+              <span className="text-xs font-black text-slate-500 uppercase tracking-wider">
+                Page {currentPage} of {totalPages}
+              </span>
+              <button
+                onClick={() => { const p = Math.min(totalPages, currentPage + 1); setCurrentPage(p); fetchData(p); }}
+                disabled={currentPage === totalPages}
+                className="px-4 py-2 text-xs font-bold bg-white border border-slate-200 rounded-lg text-slate-600 hover:bg-slate-100 disabled:opacity-50 transition-colors shadow-sm"
+              >
+                Next
+              </button>
             </div>
           )}
         </div>
