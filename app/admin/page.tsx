@@ -14,6 +14,7 @@ export default function AdminPage() {
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [totalProducts, setTotalProducts] = useState(0);
   const [activeTab, setActiveTab] = useState<"products" | "orders" | "add" | "config">("products");
   const [searchTerm, setSearchTerm] = useState("");
   const [statusMsg, setStatusMsg] = useState("");
@@ -67,6 +68,7 @@ export default function AdminPage() {
         setProducts(prodData.products || []);
         setTotalPages(prodData.totalPages || 1);
         setCurrentPage(prodData.page || 1);
+        setTotalProducts(prodData.total || 0);
       }
       if (orderData.success) setOrders(orderData.orders || []);
       if (cfgData.success) {
@@ -378,7 +380,7 @@ export default function AdminPage() {
           </div>
           <div>
             <p className="text-xs font-bold text-slate-400 uppercase">Total Garage Inventory</p>
-            <h3 className="text-2xl font-black text-slate-900">{products.length} Cars</h3>
+            <h3 className="text-2xl font-black text-slate-900">{totalProducts} Cars</h3>
           </div>
         </div>
         <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center gap-4">
@@ -402,7 +404,7 @@ export default function AdminPage() {
               activeTab === "products" ? "bg-[#C8102E] text-white" : "text-slate-600 hover:bg-slate-100"
             }`}
           >
-            Inventory ({products.length})
+            Inventory ({totalProducts})
           </button>
           <button
             onClick={() => setActiveTab("orders")}
