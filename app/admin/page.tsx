@@ -3,15 +3,18 @@
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import jsPDF from "jspdf";
+import "jspdf-autotable";
 import {
   Plus, Trash2, Edit3, ShieldCheck, RefreshCw, Car, ShoppingBag,
-  CheckCircle, Search, Sparkles, Upload, Tags, Layers, Phone, LogOut,
+  CheckCircle, Search, Sparkles, Upload, Tags, Layers, Phone, LogOut, Download
 } from "lucide-react";
 
 export default function AdminPage() {
   const [products, setProducts] = useState<any[]>([]);
   const [orders, setOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [exporting, setExporting] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalProducts, setTotalProducts] = useState(0);
@@ -158,6 +161,100 @@ export default function AdminPage() {
       console.error(e);
       setOrders(previousOrders);
       alert("Network error: Failed to delete order.");
+    }
+  };
+
+  const fetchAllInventory = async () => {
+    try {
+      const res = await fetch(`/api/products?admin=true&limit=10000&_t=${Date.now()}`, { cache: "no-store" });
+      const data = await res.json();
+      if (data.success) {
+        return data.products || [];
+      }
+      return [];
+    } catch (e) {
+      console.error("Failed to fetch all inventory for export", e);
+      return [];
+    }
+  };
+
+  const handleExportCSV = async () => {
+    setExporting(true);
+    try {
+      const allProducts = await fetchAllInventory();
+      if (allProducts.length === 0) {
+        alert("No products to export");
+        return;
+      }
+      
+      const headers = ["ID", "Name", "Brand", "Scale", "Series", "Price", "Original Price", "Color", "Stock", "Badge"];
+      const rows = allProducts.map((p: any) => [
+        p._id || p.slug,
+        `"${(p.name || "").replace(/"/g, '""')}"`,
+        `"${p.brand || ""}"`,
+        `"${p.scale || ""}"`,
+        `"${p.series || ""}"`,
+        p.price,
+        p.originalPrice || "",
+        `"${p.color || ""}"`,
+        p.stockCount ?? 25,
+        `"${p.badge || ""}"`
+      ]);
+      
+      const csvContent = [headers.join(","), ...rows.map(r => r.join(","))].join("\n");
+      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.setAttribute("download", `inventory_export_${new Date().toISOString().split("T")[0]}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      setStatusMsg("CSV Export successful!");
+    } catch (e) {
+      console.error(e);
+      alert("Failed to export CSV");
+    } finally {
+      setExporting(false);
+    }
+  };
+
+  const handleExportPDF = async () => {
+    setExporting(true);
+    try {
+      const allProducts = await fetchAllInventory();
+      if (allProducts.length === 0) {
+        alert("No products to export");
+        return;
+      }
+
+      const doc = new jsPDF();
+      doc.text("Garage Inventory Export", 14, 15);
+      
+      const tableColumn = ["Model Name", "Scale", "Series", "Price", "Stock", "Color"];
+      const tableRows = allProducts.map((p: any) => [
+        p.name,
+        p.scale,
+        p.series || p.brand,
+        `Rs ${p.price}`,
+        `${p.stockCount ?? 25}`,
+        p.color
+      ]);
+
+      (doc as any).autoTable({
+        head: [tableColumn],
+        body: tableRows,
+        startY: 20,
+        styles: { fontSize: 8 },
+        headStyles: { fillColor: [200, 16, 46] } // #C8102E
+      });
+
+      doc.save(`inventory_export_${new Date().toISOString().split("T")[0]}.pdf`);
+      setStatusMsg("PDF Export successful!");
+    } catch (e) {
+      console.error(e);
+      alert("Failed to export PDF");
+    } finally {
+      setExporting(false);
     }
   };
 
@@ -464,7 +561,7 @@ export default function AdminPage() {
       {/* ── TAB 1: PRODUCT INVENTORY ─────────────────────────────────────────── */}
       {activeTab === "products" && (
         <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden space-y-4">
-          <div className="p-4 border-b border-slate-100 flex items-center justify-between gap-4">
+          <div className="p-4 border-b border-slate-100 flex flex-wrap items-center justify-between gap-4">
             <div className="relative flex-1 max-w-sm">
               <input
                 type="text"
@@ -475,9 +572,28 @@ export default function AdminPage() {
               />
               <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
             </div>
-            <span className="text-xs text-slate-500 font-bold">
-              Showing {filteredProducts.length} diecast items
-            </span>
+            
+            <div className="flex items-center gap-2">
+              <button 
+                onClick={handleExportCSV}
+                disabled={exporting}
+                className="flex items-center gap-1.5 px-3 py-2 text-[11px] font-black uppercase tracking-wider text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors disabled:opacity-50"
+              >
+                {exporting ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <Download className="w-3.5 h-3.5" />}
+                CSV
+              </button>
+              <button 
+                onClick={handleExportPDF}
+                disabled={exporting}
+                className="flex items-center gap-1.5 px-3 py-2 text-[11px] font-black uppercase tracking-wider text-white bg-slate-800 hover:bg-slate-900 rounded-lg transition-colors disabled:opacity-50"
+              >
+                {exporting ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <Download className="w-3.5 h-3.5" />}
+                PDF
+              </button>
+              <span className="text-xs text-slate-500 font-bold ml-2 hidden sm:inline-block">
+                Showing {filteredProducts.length} items
+              </span>
+            </div>
           </div>
           {loading ? (
             <div className="p-12 text-center">
