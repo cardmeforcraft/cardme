@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import jsPDF from "jspdf";
-import "jspdf-autotable";
+import autoTable from "jspdf-autotable";
 import {
   Plus, Trash2, Edit3, ShieldCheck, RefreshCw, Car, ShoppingBag,
   CheckCircle, Search, Sparkles, Upload, Tags, Layers, Phone, LogOut, Download
@@ -240,7 +240,7 @@ export default function AdminPage() {
         p.color
       ]);
 
-      (doc as any).autoTable({
+      autoTable(doc, {
         head: [tableColumn],
         body: tableRows,
         startY: 20,
