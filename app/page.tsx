@@ -243,17 +243,17 @@ export default function HomePage() {
                           {product.description}
                         </p>
                       )}
-                      <div className="mt-3 pt-2 border-t border-slate-100 flex items-center justify-between gap-1">
-                        <div>
+                      <div className="mt-3 pt-2 border-t border-slate-100 flex items-center justify-between gap-2">
+                        <div className="flex flex-wrap items-baseline gap-x-1.5 flex-1 min-w-0">
                           <span className="text-base sm:text-lg font-black text-[#1A1A2E]">₹{product.price?.toFixed(2)}</span>
                           {product.originalPrice && product.originalPrice > product.price && (
-                            <span className="text-[11px] text-slate-400 line-through ml-1.5">₹{product.originalPrice.toFixed(2)}</span>
+                            <span className="text-[11px] text-slate-400 line-through">₹{product.originalPrice.toFixed(2)}</span>
                           )}
                         </div>
                         <button
                           onClick={() => handleQuickAdd(product)}
                           disabled={(product.stockCount ?? 0) <= 0 || product.inStock === false}
-                          className={`p-2 rounded-lg shadow-sm transition-all ${(product.stockCount ?? 0) <= 0 || product.inStock === false ? 'bg-slate-300 cursor-not-allowed text-slate-500' : 'bg-[#0256B3] hover:bg-blue-700 active:scale-95 text-white'}`}
+                          className={`flex-shrink-0 p-2 rounded-lg shadow-sm transition-all ${(product.stockCount ?? 0) <= 0 || product.inStock === false ? 'bg-slate-300 cursor-not-allowed text-slate-500' : 'bg-[#0256B3] hover:bg-blue-700 active:scale-95 text-white'}`}
                           title={(product.stockCount ?? 0) <= 0 || product.inStock === false ? "Out of Stock" : "Add to Cart"}
                         >
                           <ShoppingCart className="w-3.5 h-3.5" />
